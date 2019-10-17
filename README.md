@@ -1,24 +1,17 @@
-# README
+# Order steps
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+1 - Welcome
+  a - new order
+    * clear previous order or not?
+  b - history
+  c - pricing
+  d - about us?
 
-Things you may want to cover:
+2 - Size
+  a - selection
 
-* Ruby version
+3 - Add stickers
 
-* System dependencies
-
-* Configuration
-
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+4 - Address
+5 - Summary
+6 - Confirmation

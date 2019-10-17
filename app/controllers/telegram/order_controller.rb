@@ -14,27 +14,6 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
     respond_with :message, text: response, parse_mode: "HTML"
   end
 
-   # {
-   #  "update_id":746792400,
-   #  "message": {
-   #    "message_id":77,
-   #        "date":1571333366,
-   #        "sticker":
-   #        {"width":512,
-   #          "height":512,
-   #          "emoji":"🐕",
-   #          "set_name":"AxiDumbdles",
-   #          "is_animated":false,
-   #          "thumb":{
-   #            "file_id":"AAQBAAM-AANSTf4Hk6rpoOh0pKT9bO8vAAQBAAdtAANbGwACFgQ",
-   #            "file_size":6664,
-   #            "width":128,
-   #            "height":128
-   #          },
-   #          "file_id":
-   #          "CAADAQADPgADUk3-B5Oq6aDodKSkFgQ","file_size":36192}}}
-
-
   def ask_country
     # respond_with :message, text: response, reply_markup: {
     #   keyboard: [ISO3166::Country.all.map(&:name)],
@@ -58,6 +37,21 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
 
       response = t("new_sticker.saved")
       respond_with :message, text: response, parse_mode: "HTML"
+
+    elsif message["text"].present?
+      result = Geocoder.search(message["text"]).first
+      if result.blank?
+        respond_with :message, text: "404"
+      else
+        respond_with :message, text: result.data.to_json
+      end
+    elsif message["location"].present?
+      result = Geocoder.search([message["location"]["latitude"], message["location"]["longitude"]]).first
+      if result.blank?
+        respond_with :message, text: "404"
+      else
+        respond_with :message, text: result.data.to_json
+      end
     end
   end
 
