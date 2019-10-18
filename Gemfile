@@ -56,3 +56,5 @@ gem 'telegram-bot'
 gem 'rest-client'
 gem 'countries'
 gem 'geocoder'
+gem 'mini_magick'
+gem "aws-sdk-s3", require: false
