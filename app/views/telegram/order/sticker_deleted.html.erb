@@ -1,0 +1,5 @@
+Done!
+
+You now have <b><%= pluralize(customer.draft_order.images.count, 'sticker') %></b> remaining in you cart.
+
+<%= render partial: "telegram/order/order_menu", locals: { customer: customer } %>

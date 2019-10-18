@@ -13,9 +13,9 @@ class Montage
       image_params = image_paths.map.with_index do |image_path, index|
         "-label #{index + 1} #{image_path.shellescape}"
       end.join(" ")
-      output = "#{wdir}/output.png"
+      output = "#{wdir}/output.webp"
 
-      system("montage #{image_params} #{output}")
+      system("montage -pointsize 32 -geometry +2+2 #{image_params} #{output}")
 
       yield output
     end

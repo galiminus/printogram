@@ -8,4 +8,4 @@ You already have <b><%= pluralize(customer.draft_order.images.count, 'sticker') 
 <% end %>
 How can I help you today?
 
-<%= render partial: "telegram/order/main_menu" %>
+<%= render partial: "telegram/order/main_menu", locals: { customer: customer } %>
