@@ -18,3 +18,4 @@ Product.destroy_all
 ].each.with_index do |attributes, order|
   Product.create(attributes.merge(order: order))
 end
+AdminUser.create!(email: 'admin@example.com', password: 'password', password_confirmation: 'password') if Rails.env.development?
