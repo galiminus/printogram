@@ -1,11 +1,11 @@
-Hello <%= customer.name %>!
-
-Welcome to PrintoGram, the best service to turn Telegram stickers into real stickers!
+Welcome to <b>PrintoGram</b>, the best service to turn Telegram stickers into real stickers!
 
 <% if customer.draft_order.images.any? %>
-You already have <b><%= pluralize(customer.draft_order.images.count, 'sticker') %></b> in you cart.
-
+You already have <b><%= pluralize(customer.draft_order.images.count, 'sticker') %></b> in your cart. The current price per sticker is <%= product.formated_price %>.
+<% else %>
+The current price per sticker is <%= product.formated_price %>.
 <% end %>
+
 How can I help you today?
 
 <%= render partial: "telegram/order/main_menu", locals: { customer: customer } %>

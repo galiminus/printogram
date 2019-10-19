@@ -2,6 +2,7 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
   include Telegram::Bot::UpdatesController::Session
 
   before_action :set_customer
+  before_action :set_product
 
   CONTINUE_ORDER = "Continue order"
   START_NEW_ORDER = "Start a new order"
@@ -15,15 +16,6 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
     respond_with :message, text: render("welcome"), parse_mode: "HTML"
   end
 
-  def ask_country
-    # respond_with :message, text: response, reply_markup: {
-    #   keyboard: [ISO3166::Country.all.map(&:name)],
-    #   resize_keyboard: false,
-    #   one_time_keyboard: true,
-    #   selective: false,
-    # }
-  end
-
   def message(message)
     if message["sticker"].present?
       respond_with :message, text: render("sticker_loading"), parse_mode: "HTML"
@@ -32,6 +24,7 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
 
       image = Image.create!(
         order: @customer.draft_order,
+        product: @product
       )
       sticker = open("https://api.telegram.org/file/bot#{self.bot.token}/#{profile_photo_file_path}")
       image.document.attach({
@@ -99,7 +92,7 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
     respond_with :message, text: render("continue"), parse_mode: "HTML"
 
     @customer.draft_order.cart.open do |cart|
-      respond_with :photo, photo: cart, caption: render("cart"), parse_mode: "HTML"
+      respond_with :photo, photo: cart, caption: render("clear_order_cancelled"), parse_mode: "HTML"
     end
   end
 
@@ -154,7 +147,11 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
   protected
 
   def render(path, locals = {})
-    ActionController::Base.new.render_to_string("telegram/order/#{path}", locals: { customer: @customer }.merge(locals))
+    ActionController::Base.new.render_to_string("telegram/order/#{path}", locals: { customer: @customer, product: @product }.merge(locals))
+  end
+
+  def set_product
+    @product = Product.first
   end
 
   def set_customer

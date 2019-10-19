@@ -1,5 +1,5 @@
 class Product < ApplicationRecord
-  def to_keyboard
-    "#{name}"
+  def formated_price
+    Money.new(self.price, "USD").format(symbol: '$')
   end
 end
