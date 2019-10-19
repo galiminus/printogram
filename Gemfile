@@ -60,3 +60,7 @@ gem 'mini_magick'
 gem "aws-sdk-s3", require: false
 gem 'money'
 gem 'eu_central_bank'
+gem 'slim-rails'
+gem 'bulma-rails'
+gem 'active_link_to'
+gem 'font-awesome-sass', '~> 5.9.0'

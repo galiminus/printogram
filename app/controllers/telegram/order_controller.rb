@@ -40,22 +40,6 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
       else
         respond_with :message, text: render("sticker_added"), parse_mode: "HTML"
       end
-
-    elsif message["text"].present?
-      result = Geocoder.search(message["text"]).first
-      if result.blank?
-        respond_with :message, text: render("error"), parse_mode: "HTML"
-      else
-        respond_with :message, text: result.data.to_json
-      end
-
-    elsif message["location"].present?
-      result = Geocoder.search([message["location"]["latitude"], message["location"]["longitude"]]).first
-      if result.blank?
-        respond_with :message, text: render("error")
-      else
-        respond_with :message, text: result.data.to_json
-      end
     end
   end
 
@@ -132,16 +116,12 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
     }
   end
 
-  def checkout!(data = nil)
-    if @customer.draft_order.address1.blank?
-
-    else
-
-    end
-  end
-
   def start!(data = nil, *)
     respond_with :message, text: render("welcome"), parse_mode: "HTML"
+  end
+
+  def checkout!(data = nil, *)
+    respond_with :message, text: render("checkout"), parse_mode: "HTML"
   end
 
   protected

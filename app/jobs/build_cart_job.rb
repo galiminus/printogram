@@ -5,7 +5,7 @@ class BuildCartJob < ApplicationJob
     Montage.create_cart(order) do |path|
       order.cart.attach({
         io: open(path),
-        filename: "cart-#{order.reference}.webp"
+        filename: "cart-#{order.id}.webp"
       })
     end
   end

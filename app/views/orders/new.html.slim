@@ -1,0 +1,21 @@
+#orders-new
+  .hero.is-dark.is-medium.is-bold
+    .hero-body
+      .container
+        .level.is-mobile
+          .level-left
+            .level-item
+              .content
+                h1.title.brand
+                  | PRINTOGRAM
+                #service-description
+                  | Turn <b>Telegram</b> stickers into real stickers!
+          .level-right
+            .content.has-text-white
+              = link_to "https://t.me/printogram_development_bot", class: 'button is-inverted is-dark' do
+                | Talk with the Printogram bot
+              #info-links
+                = link_to privacy_policy_path, class: 'button is-small is-outlined is-inverted is-dark' do
+                  | Privacy policy
+                = link_to terms_and_conditions_path, class: 'button is-small is-outlined is-inverted is-dark' do
+                  | Terms and conditions

@@ -10,6 +10,29 @@
  * files in this directory. Styles in this file should be added after the last require_* statement.
  * It is generally better to create a new file per style scope.
  *
- *= require_tree .
- *= require_self
  */
+
+@import "font-awesome-sprockets";
+@import "font-awesome";
+@import "bulma";
+
+html, body {
+  height: 100%;
+}
+
+#orders-new {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 100%;
+  background-image: image-url("positive.png");
+}
+
+#info-links {
+  text-align: center;
+  padding: 3px;
+  & > a.button {
+    display: block;
+    margin-top: 4px;
+  }
+}
