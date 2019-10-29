@@ -9,13 +9,11 @@ class Order < ApplicationRecord
   end
 
   def token
-   Base64.strict_encode64("#{id}:#{Digest::SHA1.digest(id.to_s)[0..8]}")
+    Base64.strict_encode64(Encryptor.encrypt(id))
   end
 
   def self.find_by_token(token)
-    Order.find(Base64.strict_decode64(token).split(":")[0]).tap do |record|
-      raise ActiveRecord::RecordNotFound if record.token != token
-    end
+    Order.find(Encryptor.decrypt(Base64.strict_decode64(token)))
   end
 
   def price
