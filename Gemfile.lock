@@ -362,7 +362,7 @@ DEPENDENCIES
   mini_magick
   money
   pg (>= 0.18, < 2.0)
-  puma (~> 3.11)
+  puma (~> 3.12.1)
   rails (~> 6.0.0)
   rest-client
   sass-rails (~> 5)
