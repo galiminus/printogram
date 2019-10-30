@@ -24,7 +24,6 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
 
       image = Image.create!(
         order: @customer.draft_order,
-        product: @product
       )
       sticker = open("https://api.telegram.org/file/bot#{self.bot.token}/#{profile_photo_file_path}")
       image.document.attach({
