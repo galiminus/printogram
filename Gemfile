@@ -65,3 +65,5 @@ gem 'active_link_to'
 gem 'font-awesome-sass', '~> 5.9.0'
 gem 'activeadmin', '2.4.0'
 gem 'devise'
+gem 'paper_trail'
+
