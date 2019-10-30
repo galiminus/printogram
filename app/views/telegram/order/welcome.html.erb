@@ -1,4 +1,4 @@
-Welcome to <b>PrintoGram</b>, the best service to turn Telegram stickers into real stickers!
+Welcome to <b><%= Rails.configuration.site_name %></b>, the best service to turn Telegram stickers into real stickers!
 
 <% if customer.draft_order.images.any? %>
 You already have <b><%= pluralize(customer.draft_order.images.count, 'sticker') %></b> in your cart. The current price per sticker is <%= product.formated_price %>.

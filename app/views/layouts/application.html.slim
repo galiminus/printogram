@@ -2,7 +2,7 @@ doctype html
 html
   head
     title
-      | Daily
+      = Rails.configuration.site_name
     = csrf_meta_tags
     = csp_meta_tag
 
@@ -37,7 +37,7 @@ html
             .level-item
               a.has-text-dark href=root_url
                 h1.brand
-                  | DAILY
+                  = Rails.configuration.site_name.upcase
           .level-left#savings-summary
             .level-item
               - if @date.present?

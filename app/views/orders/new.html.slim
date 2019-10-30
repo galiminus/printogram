@@ -7,12 +7,12 @@
             .level-item
               .content
                 h1.title.brand
-                  | PRINTOGRAM
+                  = Rails.configuration.site_name.upcase
                 #service-description
                   | Turn <b>Telegram</b> stickers into real stickers!
           .level-right
             .content.has-text-white
-              = link_to "https://t.me/printogram_development_bot", class: 'button is-outlined is-inverted is-dark' do
+              = link_to "https://t.me/printogram_development_bot?start=start", class: 'button is-outlined is-inverted is-dark' do
                 | Start ordering on Telegram
               / #info-links
               /   = link_to privacy_policy_path, class: 'button is-small is-outlined is-inverted is-dark' do
