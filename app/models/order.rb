@@ -7,6 +7,8 @@ class Order < ApplicationRecord
 
   has_one_attached :cart
 
+  after_create :create_pwinty_order
+
   def reference
     Zlib::crc32("#{id}#{customer.telegram_id}")
   end
@@ -64,5 +66,15 @@ class Order < ApplicationRecord
       postal_or_zip_code: nil,
       country_code: nil
     })
+  end
+
+  def create_pwinty_order
+    response = Pwinty.create_order({
+      merchantOrderId: self.id,
+      recipientName: customer.name,
+      countryCode: "FR",
+      preferredShippingMethod: "Budget"
+    })
+    self.update(pwinty_reference: JSON.parse(response.body)["data"]["id"])
   end
 end
