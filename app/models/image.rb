@@ -19,4 +19,18 @@ class Image < ApplicationRecord
     })
     self.update(pwinty_reference: JSON.parse(response.body)["data"]["id"])
   end
+
+  def download!
+    FileUtils.mkdir_p File.dirname(local_path)
+
+    unless File.exists?(local_path)
+      system("curl -s #{document.service_url.shellescape} --output #{local_path}")
+    end
+
+    local_path
+  end
+
+  def local_path
+    "#{ENV["IMAGE_DOCUMENT_CACHE"] || "/tmp"}/#{Digest::SHA1.hexdigest(id.to_s).insert(3, '/')}.webp"
+  end
 end
