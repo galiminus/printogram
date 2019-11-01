@@ -21,6 +21,14 @@ ActiveAdmin.register Order do
     @pwinty_validation = JSON.parse(Pwinty.validate_order(Order.find(params[:id])).body)
   end
 
+  member_action :submit, method: :get do
+    @pwinty_response = JSON.parse(Pwinty.update_order_status(Order.find(params[:id]), { status: "Submitted" }).body)
+  end
+
+  member_action :cancel, method: :get do
+    @pwinty_response = JSON.parse(Pwinty.update_order_status(Order.find(params[:id]), { status: "Cancelled" }).body)
+  end
+
   action_item :pwinty_data, only: [:show, :edit] do
     link_to "Pwinty data", pwinty_data_admin_order_path(id: params[:id])
   end
@@ -29,6 +37,13 @@ ActiveAdmin.register Order do
     link_to "Validation", pwinty_validation_admin_order_path(id: params[:id])
   end
 
+  action_item :submit, only: [:show, :edit] do
+    link_to "Submit", submit_admin_order_path(id: params[:id]), data: { confirm: "Are you sure you want to submit this order?"}
+  end
+
+  action_item :cancel, only: [:show, :edit] do
+    link_to "Cancel", cancel_admin_order_path(id: params[:id]), data: { confirm: "Are you sure you want to cancel this order?"}
+  end
 
   index do
     selectable_column

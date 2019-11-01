@@ -21,16 +21,16 @@ module Pwinty
     client["orders"][order.pwinty_reference]["SubmissionStatus"].get
   end
 
+  def self.update_order_status(order, params)
+    client["orders"][order.pwinty_reference]["Status"].post(params)
+  end
+
   def self.create_image(order, params)
     client["orders"][order.pwinty_reference]["images"].post(params)
   end
 
   def self.check_order_validity(order)
     client["orders"][order.pwinty_reference]["SubmissionStatus"].get
-  end
-
-  def self.submit_order(order)
-    client["orders"][order.pwinty_reference]["status"].post(state: :submitted)
   end
 
   def self.countries

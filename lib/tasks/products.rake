@@ -1,5 +1,5 @@
 namespace :products do
-  task :refresh_prices do
+  task refresh_prices: :environment do
     Money.default_bank = EuCentralBank.new
     Money.default_bank.update_rates
 
