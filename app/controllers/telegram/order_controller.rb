@@ -12,8 +12,10 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
 
   DONE_EDIT = "Done"
 
-  rescue_from Exception do
+  rescue_from Exception do |error|
     respond_with :message, text: render("error"), parse_mode: "HTML"
+
+    raise error if Rails.env.development?
   end
 
   def welcome
