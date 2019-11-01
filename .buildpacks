@@ -1,1 +1,2 @@
 https://github.com/heroku/heroku-buildpack-ruby.git#v206
+https://github.com/clhuang/heroku-buildpack-webp-binaries.git
