@@ -13,6 +13,23 @@ ActiveAdmin.register Order do
     :preferred_shipping_method
   ]
 
+  member_action :pwinty_data, method: :get do
+    @pwinty_data = JSON.parse(Pwinty.get_order(Order.find(params[:id])).body)
+  end
+
+  member_action :pwinty_validation, method: :get do
+    @pwinty_validation = JSON.parse(Pwinty.validate_order(Order.find(params[:id])).body)
+  end
+
+  action_item :pwinty_data, only: [:show, :edit] do
+    link_to "Pwinty data", pwinty_data_admin_order_path(id: params[:id])
+  end
+
+  action_item :validation, only: [:show, :edit] do
+    link_to "Validation", pwinty_validation_admin_order_path(id: params[:id])
+  end
+
+
   index do
     selectable_column
     id_column
