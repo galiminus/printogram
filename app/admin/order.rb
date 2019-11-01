@@ -25,13 +25,13 @@ ActiveAdmin.register Order do
 
   show do
     panel "Record info" do
-      attributes_table_for user do
+      attributes_table_for order do
         row :id
       end
     end
 
     panel "Order info" do
-      attributes_table_for user do
+      attributes_table_for order do
         row :country_code
         row :recipient_name
         row :state

@@ -21,15 +21,16 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
       respond_with :message, text: render("sticker_loading"), parse_mode: "HTML"
 
       profile_photo_file_path = self.bot.get_file(file_id: message["sticker"]["file_id"])["result"]["file_path"]
+      sticker = open("https://api.telegram.org/file/bot#{self.bot.token}/#{profile_photo_file_path}")
 
       image = Image.create!(
         order: @customer.draft_order,
+        product: @product,
+        document: {
+          io: sticker,
+          filename: "sticker-#{ message["sticker"]["file_id"]}.webp"
+        }
       )
-      sticker = open("https://api.telegram.org/file/bot#{self.bot.token}/#{profile_photo_file_path}")
-      image.document.attach({
-        io: sticker,
-        filename: "sticker-#{ message["sticker"]["file_id"]}.webp"
-      })
       BuildCartJob.perform_now(@customer.draft_order)
 
       if @customer.draft_order.images.count > 1

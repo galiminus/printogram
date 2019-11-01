@@ -17,6 +17,10 @@ module Pwinty
     client["orders"][order.pwinty_reference].get
   end
 
+  def self.validate_order(order)
+    client["orders"][order.pwinty_reference]["SubmissionStatus"].get
+  end
+
   def self.create_image(order, params)
     client["orders"][order.pwinty_reference]["images"].post(params)
   end
