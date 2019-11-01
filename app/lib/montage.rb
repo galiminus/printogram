@@ -6,7 +6,7 @@ class Montage
       end.join(" ")
       output = "#{wdir}/output.webp"
 
-      system("montage -pointsize 32 -geometry +2+2 #{image_params} #{output}")
+      system("montage -pointsize 48 -geometry +2+2 -bordercolor white -border 10 #{image_params} #{output}")
 
       yield output
     end
