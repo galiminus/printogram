@@ -7,7 +7,8 @@ namespace :products do
       begin
         price = Pwinty.prices(country_code: "US", skus: [product.sku])["prices"].first
         usd_price = Money.new(price["price"], price["currency"]).exchange_to("USD")
-        product.update(price: (usd_price.fractional * 1.2 / 10).round * 10)
+        price = [(usd_price.fractional * 1.2 / 10).round * 10 - 0.01, 1.49].max
+        product.update(price: price)
       rescue => error
         puts error
       end
