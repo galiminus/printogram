@@ -12,6 +12,10 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
 
   DONE_EDIT = "Done"
 
+  rescue_from Exception do
+    respond_with :message, text: render("error"), parse_mode: "HTML"
+  end
+
   def welcome
     respond_with :message, text: render("welcome"), parse_mode: "HTML"
   end
