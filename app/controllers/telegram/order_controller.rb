@@ -10,6 +10,9 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
   CANCEL_CLEAR_ORDER = "Cancel"
   CONFIRM_CLEAR_ORDER = "Sure"
 
+  CONFIRM_DELETE_IMAGE = "Delete"
+  CANCEL_DELETE_IMAGE = "Cancel"
+
   DONE_EDIT = "« Back"
 
   rescue_from Exception do |error|
@@ -24,6 +27,10 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
 
   def message(message)
     if message["sticker"].present?
+      if message["sticker"]["is_animated"]
+        return respond_with :message, text: render("animated_sticker_error"), parse_mode: "HTML"
+      end
+
       respond_with :message, text: render("sticker_loading"), parse_mode: "HTML"
 
       add_sticker(message["sticker"])
@@ -36,12 +43,17 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
       else
         respond_with :message, text: render("sticker_added"), parse_mode: "HTML"
       end
+
     elsif message["text"].match(/^https:\/\/t.me\/addstickers\/.+$/)
       set_name = message["text"].match(/^https:\/\/t.me\/addstickers\/(.+)$/)[1]
       response = self.bot.get_sticker_set(name: set_name)
 
       allowed_stickers = response["result"]["stickers"].select do |sticker_message|
         !sticker_message["is_animated"]
+      end
+
+      if allowed_stickers.empty?
+        return respond_with :message, text: render("animated_sticker_error"), parse_mode: "HTML"
       end
 
       message = nil
@@ -64,6 +76,23 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
       @customer.draft_order.cart.open do |cart|
         respond_with :photo, photo: cart, caption: render("sticker_added"), parse_mode: "HTML"
       end
+
+    elsif message["text"].match(/[0-9]+/)
+      index = message["text"].to_i
+      image = @customer.draft_order.images.order(created_at: :asc).to_a[index - 1]
+
+      if image.blank?
+        return respond_with :message, text: render("error_sticker_not_found", { index: index }), parse_mode: "HTML"
+      end
+
+      respond_with :message, text: render("delete_sticker_confirmation", { index: index }), reply_markup: {
+        inline_keyboard: [
+          [
+            { text: CONFIRM_DELETE_IMAGE, callback_data: "DELETE_IMAGE_#{image.id}_#{index}" },
+            { text: CANCEL_DELETE_IMAGE, callback_data: "CANCEL_DELETE_IMAGE" },
+          ]
+        ]
+      }
     end
   end
 
