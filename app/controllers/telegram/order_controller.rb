@@ -60,7 +60,10 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
     elsif data == "CONFIRM_CLEAR_ORDER"
       @customer.draft_order.destroy
       respond_with :message, text: render("order_cleared"), parse_mode: "HTML"
-    else data.match(/^DELETE_IMAGE_/)
+    elsif data.match(/^SET_CART_PAGE_/)
+      page = data.match(/^SET_CART_PAGE_([0-9]+)$/)[1]
+      edit_cart_keyboard(page.to_i)
+    elsif data.match(/^DELETE_IMAGE_/)
       id, index = data.match(/^DELETE_IMAGE_([0-9]+)_([0-9]+)$/)[1..2]
 
       respond_with :message, text: render("deleting_sticker", index: index.to_i), parse_mode: "HTML"
@@ -113,13 +116,7 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
   end
 
   def edit!(data = nil)
-    respond_with :message, text: render("edit"), reply_markup: {
-      inline_keyboard: [
-        @customer.draft_order.images.map.with_index do |image, index|
-          { text: (index + 1).to_s, callback_data: "DELETE_IMAGE_#{image.id}_#{index}" }
-        end + [{ text: DONE_EDIT, callback_data: "DONE_EDIT" }]
-      ]
-    }
+    edit_cart_keyboard(1)
   end
 
   def start!(data = nil, *)
@@ -128,6 +125,21 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
 
   def checkout!(data = nil, *)
     respond_with :message, text: render("checkout"), parse_mode: "HTML"
+  end
+
+  def edit_cart_keyboard(page)
+    page_size = 5
+    before_page = { text: "«", callback_data: "SET_CART_PAGE_#{page - 1}" } if page > 1
+    next_page = { text: "»", callback_data: "SET_CART_PAGE_#{page + 1}" } if page <= @customer.draft_order.images.count / page_size
+
+    respond_with :message, text: render("edit"), reply_markup: {
+      inline_keyboard: [[{ text: DONE_EDIT, callback_data: "DONE_EDIT" }]] + [
+        ([ before_page ] +
+          @customer.draft_order.images.to_a[((page - 1) * page_size), page_size].map.with_index do |image, index|
+            { text: ((page - 1) * page_size + index + 1).to_s, callback_data: "DELETE_IMAGE_#{image.id}_#{(page - 1) * page_size + index + 1}" }
+          end + [ next_page ]).compact
+      ]
+    }
   end
 
   protected
