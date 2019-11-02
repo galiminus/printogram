@@ -10,7 +10,7 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
   CANCEL_CLEAR_ORDER = "Cancel"
   CONFIRM_CLEAR_ORDER = "Sure"
 
-  DONE_EDIT = "Done"
+  DONE_EDIT = "« Back"
 
   rescue_from Exception do |error|
     respond_with :message, text: render("error"), parse_mode: "HTML"
@@ -26,17 +26,7 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
     if message["sticker"].present?
       respond_with :message, text: render("sticker_loading"), parse_mode: "HTML"
 
-      profile_photo_file_path = self.bot.get_file(file_id: message["sticker"]["file_id"])["result"]["file_path"]
-      sticker = open("https://api.telegram.org/file/bot#{self.bot.token}/#{profile_photo_file_path}")
-
-      image = Image.create!(
-        order: @customer.draft_order,
-        product: @product,
-        document: {
-          io: sticker,
-          filename: "sticker-#{ message["sticker"]["file_id"]}.webp"
-        }
-      )
+      add_sticker(message["sticker"])
       BuildCartJob.perform_now(@customer.draft_order)
 
       if @customer.draft_order.images.count > 1
@@ -45,6 +35,34 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
         end
       else
         respond_with :message, text: render("sticker_added"), parse_mode: "HTML"
+      end
+    elsif message["text"].match(/^https:\/\/t.me\/addstickers\/.+$/)
+      set_name = message["text"].match(/^https:\/\/t.me\/addstickers\/(.+)$/)[1]
+      response = self.bot.get_sticker_set(name: set_name)
+
+      allowed_stickers = response["result"]["stickers"].select do |sticker_message|
+        !sticker_message["is_animated"]
+      end
+
+      message = nil
+      message_time = nil
+      allowed_stickers.each.with_index do |sticker_message, index|
+        add_sticker(sticker_message)
+        if message_time.blank? || message_time < 1.seconds.before || index == allowed_stickers.count - 1
+          if message.present?
+            bot.delete_message chat_id: message["result"]["chat"]["id"], message_id: message["result"]["message_id"]
+          end
+
+          message = respond_with :message, text: render("sticker_set_progress", index: index + 1, total: allowed_stickers.count), parse_mode: "HTML"
+          message_time = Time.now
+        end
+      end
+      respond_with :message, text: render("sticker_set_loading"), parse_mode: "HTML"
+
+      BuildCartJob.perform_now(@customer.draft_order)
+
+      @customer.draft_order.cart.open do |cart|
+        respond_with :photo, photo: cart, caption: render("sticker_added"), parse_mode: "HTML"
       end
     end
   end
@@ -130,7 +148,7 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
   def edit_cart_keyboard(page)
     page_size = 5
     before_page = { text: "«", callback_data: "SET_CART_PAGE_#{page - 1}" } if page > 1
-    next_page = { text: "»", callback_data: "SET_CART_PAGE_#{page + 1}" } if page <= @customer.draft_order.images.count / page_size
+    next_page = { text: "»", callback_data: "SET_CART_PAGE_#{page + 1}" } if page <= (@customer.draft_order.images.count - 1) / page_size
 
     respond_with :message, text: render("edit"), reply_markup: {
       inline_keyboard: [[{ text: DONE_EDIT, callback_data: "DONE_EDIT" }]] + [
@@ -154,5 +172,19 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
 
   def set_customer
     @customer = Customer.create_from_telegram! from
+  end
+
+  def add_sticker(sticker_message)
+    sticker_file_path = self.bot.get_file(file_id: sticker_message["file_id"])["result"]["file_path"]
+    sticker = open("https://api.telegram.org/file/bot#{self.bot.token}/#{sticker_file_path}")
+
+    image = Image.create!(
+      order: @customer.draft_order,
+      product: @product,
+      document: {
+        io: sticker,
+        filename: "sticker-#{ sticker_message["file_id"]}.webp"
+      }
+    )
   end
 end
