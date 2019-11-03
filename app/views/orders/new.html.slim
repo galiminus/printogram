@@ -10,14 +10,15 @@ header#header-hero-container
                   = Rails.configuration.site_name.upcase
                 #service-description
                   | Turn <b>Telegram</b> stickers into real stickers
-            .level-item
-                .price-tag
-                  = "#{Money.new(Product.first.price, "USD").format(symbol: '$')} per sticker"
 
           .level-right
-            .content.has-text-white.has-text-centered
-              = link_to "https://t.me/#{Rails.application.credentials.telegram[:order_bot_name]}?start=start", class: 'button is-outlined is-inverted is-dark' do
-                | Get started on Telegram
+            .level-item
+              .content.has-text-white.has-text-centered
+                = link_to "https://t.me/#{Rails.application.credentials.telegram[:order_bot_name]}?start=start", class: 'button is-outlined is-inverted is-info' do
+                  | Get started on Telegram
+            .level-item.is-hidden-mobile
+                .price-tag
+                  = "#{Money.new(Product.first.price, "USD").format(symbol: '$')} per sticker"
 
 section#help-hero-container
   .hero.is-light.is-medium.is-bold
@@ -46,19 +47,19 @@ section#faq-hero-container
       .container
         .content.has-text-centered.is-large
           h3 How do I create my order?
-          p
+          p.has-text-left
             | Our <a href="https://t.me/#{Rails.application.credentials.telegram[:order_bot_name]}?start=start">@pwintogrambot</a> will help with your order. Send them all the stickers you want to print, you can even send whole sticker sets. No worries, you can edit your cart at any point before you finalize your order.
 
           h3 How much does it cost?
-          p
-            | The price is fixed to #{Money.new(Product.first.price, "USD").format(symbol: '$')} per sticker for a 3x4” / 7.6x10.1cm size, this is the only size we currently provide since Telegram sticker don't allow good quality printing on bigger stickers. The price may slightly change over time depending on the current value of the pound (GBP).
+          p.has-text-left
+            | The price is fixed to #{Money.new(Product.first.price, "USD").format(symbol: '$')} per sticker for a 3x4” / 7.6x10.1cm size, this is the only size we currently provide since Telegram stickers format don't allow good quality printing on bigger sizes.
 
           h3 How is payment handled?
-          p
+          p.has-text-left
             | Pwintogram uses <a target="_blank" rel="noopener" href="https://telegram.org/blog/payments">Telegram Payment</a> to gather your shipping information and handle payment, your card number will never be shared with us and the transaction is secured by the trusted <a target="_blank" rel="noopener" href="https://stripe.com/">Stripe</a> platform.
 
           h3 Who prints and ships the stickers?
-          p
+          p.has-text-left
             | All your orders are sent to <a target="_blank" rel="noopener" href="https://pwinty.com/">Pwinty</a>, a high-quality printing and shipping service. All products are printed and shipped near you to give you the best shipping cost.
 
 footer#footer-hero-container

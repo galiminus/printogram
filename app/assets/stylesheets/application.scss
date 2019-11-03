@@ -12,9 +12,11 @@
  *
  */
 
+@import url('https://fonts.googleapis.com/css?family=Carter+One|Roboto+Condensed&display=swap');
+
 $info: #239bd8;
 // $family-sans-serif: 'Montserrat', sans-serif;
-$family-sans-serif: 'Fjalla One', sans-serif;
+$family-sans-serif: 'Roboto Condensed', sans-serif;
 
 @import "font-awesome-sprockets";
 @import "font-awesome";
@@ -37,7 +39,6 @@ html, body {
   width: 100%;
   z-index: 1;
   .hero {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.4);
   }
   .brand {
     font-size: 3em;
@@ -49,14 +50,14 @@ html, body {
   flex-direction: column;
   justify-content: center;
   width: 100%;
-  min-height: 70vh;
-  margin-top: 128px;
+  min-height: 50vh;
+  margin-top: 0px;
   .hero {
     background: transparent;
   }
   .level-item {
     flex: 1;
-    margin: 56px 12px;
+    margin: 56px 24px;
   }
   .heading {
     font-size: 3em;
@@ -71,17 +72,18 @@ html, body {
     color: white;
     margin-left: auto;
     margin-right: auto;
-    box-shadow: 0px 2px 5px -2px rgba(0,0,0,0.5);
-    box-shadow: 0px 2px 6px 1px rgba(0,0,0,0.3);
+    box-shadow: 0px 1px 4px 0px rgba(0,0,0,0.3);
 
     border: 8px solid #fff;
+    background-color: #f4511e;
   }
   .title {
     padding: 1em 0;
     font-size: 1.4em;
+    font-weight: bold;
   }
   img {
-    // max-width: 320px;
+    max-width: 270px;
     box-shadow: 0px 5px 8px -2px rgba(0,0,0,0.5);
   }
 }
@@ -91,7 +93,7 @@ html, body {
     color: white;
   }
   .container {
-    max-width: 640px;
+    max-width: 620px;
     a:hover {
       color: $info;
     }
@@ -113,12 +115,10 @@ html, body {
   width: auto;
   height: 38px;
 
-  background-color: #888;
-  -webkit-border-radius: 3px 4px 4px 3px;
-  -moz-border-radius: 3px 4px 4px 3px;
+  background-color: #f4511e;
   border-radius: 3px 4px 4px 3px;
 
-  border-left: 1px solid #888;
+  border-left: 1px solid #f4511e;
 
   /* This makes room for the triangle */
   margin-left: 32px;
@@ -135,6 +135,8 @@ html, body {
 
   font-family: 'Carter One', cursive;
   font-size: 1.4em;
+
+  box-shadow: 0px 1px 4px 0px rgba(0,0,0,0.3);
 }
 
 /* Makes the triangle */
@@ -147,7 +149,7 @@ html, body {
   height: 0;
   border-top: 19px solid transparent;
   border-bottom: 19px solid transparent;
-  border-right: 19px solid #888;
+  border-right: 19px solid #f4511e;
 }
 
 /* Makes the circle */
@@ -176,5 +178,10 @@ html, body {
   }
   #help-hero-container {
     margin-top: 192px;
+  }
+  #header-hero-container {
+    .hero-body {
+      padding-bottom: 0;
+    }
   }
 }
