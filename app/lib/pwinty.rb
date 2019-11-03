@@ -13,6 +13,10 @@ module Pwinty
     client["orders"].post(params)
   end
 
+  def self.update_order(order, params)
+    client["orders"][order.pwinty_reference].put(params)
+  end
+
   def self.get_order(order)
     client["orders"][order.pwinty_reference].get
   end

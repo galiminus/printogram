@@ -16,9 +16,9 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
   DONE_EDIT = "« Back"
 
   rescue_from Exception do |error|
-    respond_with :message, text: render("error"), parse_mode: "HTML"
-
     raise error if Rails.env.development?
+
+    respond_with :message, text: render("error"), parse_mode: "HTML"
   end
 
   def welcome
@@ -171,7 +171,19 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
   end
 
   def checkout!(data = nil, *)
-    respond_with :message, text: render("checkout"), parse_mode: "HTML"
+    respond_with(:invoice, {
+      title: "Checkout",
+      description: "Please enter your shipping and payment information. The process is fully handled by Telegram and your private payment information will never be shared with us.",
+      provider_token: Rails.application.credentials.stripe[:telegram_token],
+      currency: "USD",
+      start_parameter: "checkout",
+      prices: [{ label: "#{@customer.draft_order.images.count} stickers", amount: @customer.draft_order.price }],
+      need_name: true,
+      need_shipping_address: true,
+      payload: JSON.dump({ order_id: @customer.draft_order.id }),
+      is_flexible: true,
+
+    })
   end
 
   def edit_cart_keyboard(page)
@@ -187,6 +199,33 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
           end + [ next_page ]).compact
       ]
     }
+  end
+
+  def shipping_query(data = nil)
+    @customer.draft_order.update({
+      country_code: data["shipping_address"]["country_code"],
+      address1: data["shipping_address"]["street_line1"],
+      address2: data["shipping_address"]["street_line2"],
+      address_town_or_city: data["shipping_address"]["city"],
+      state_or_county: data["shipping_address"]["state"],
+      postal_or_zip_code: data["shipping_address"]["post_code"],
+    })
+
+    options = {
+      shipping_options: @customer.draft_order.shipping_options.map do |shipping_method, shipping_option|
+        {
+          id: Digest::SHA1.hexdigest("#{shipping_method}-#{shipping_option["shipments"].first["carrier"]}"),
+          title: "#{shipping_method} - ETA #{Time.parse(shipping_option["shipments"].first["earliestEstimatedArrivalDate"]).strftime("%b %d")}",
+          prices: [
+            {
+              label: "#{shipping_method} shipping",
+              amount: shipping_option["price"].to_s
+            }
+          ]
+        }
+      end
+    }
+    answer_shipping_query(true, options)
   end
 
   protected

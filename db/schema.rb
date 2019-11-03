@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_10_31_123700) do
+ActiveRecord::Schema.define(version: 2019_11_03_200808) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -93,7 +93,7 @@ ActiveRecord::Schema.define(version: 2019_10_31_123700) do
   end
 
   create_table "orders", force: :cascade do |t|
-    t.string "country_code"
+    t.string "country_code", default: "FR"
     t.string "recipient_name"
     t.string "state", default: "draft"
     t.bigint "customer_id"
@@ -104,7 +104,7 @@ ActiveRecord::Schema.define(version: 2019_10_31_123700) do
     t.string "address_town_or_city"
     t.string "state_or_county"
     t.string "postal_or_zip_code"
-    t.string "preferred_shipping_method"
+    t.string "preferred_shipping_method", default: "Budget"
     t.integer "pwinty_reference"
     t.index ["customer_id"], name: "index_orders_on_customer_id"
     t.index ["state"], name: "index_orders_on_state"

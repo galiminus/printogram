@@ -10,7 +10,9 @@ ActiveAdmin.register Order do
     :address_town_or_city,
     :state_or_county,
     :postal_or_zip_code,
-    :preferred_shipping_method
+    :preferred_shipping_method,
+    :customer_id,
+    images_attributes: [:document, :created_at, :updated_at]
   ]
 
   member_action :pwinty_data, method: :get do
