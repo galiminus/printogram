@@ -20,24 +20,153 @@ $info: #239bd8;
 
 html, body {
   height: 100%;
+  background-image: image-url("shl.png");
 }
 
-#orders-new {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  height: 100%;
-  background-image: image-url("shl.png");
+.brand, h1, h2, h3 {
+  font-family: 'Carter One', cursive;
+}
+
+#header-hero-container {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 1;
+  .hero {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+  }
   .brand {
-    font-family: 'Carter One', cursive;
+    font-size: 3em;
   }
 }
 
-#info-links {
-  text-align: center;
-  padding: 3px;
-  & > a.button {
-    display: block;
-    margin-top: 4px;
+#help-hero-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  min-height: 70vh;
+  margin-top: 128px;
+  .hero {
+    background: transparent;
+  }
+  .level-item {
+    flex: 1;
+    margin: 56px 12px;
+  }
+  .heading {
+    font-size: 3em;
+    font-family: 'Carter One', cursive;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 112px;
+    height: 112px;
+    border-radius: 64px;
+    background-color: $info;
+    color: white;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .title {
+    padding: 1em 0;
+    font-size: 1.4em;
+  }
+  img {
+    // max-width: 320px;
+    border: 1px solid #999;
+  }
+}
+
+#faq-hero-container {
+  h3 {
+    color: white;
+  }
+  .container {
+    max-width: 640px;
+    a:hover {
+      color: $info;
+    }
+  }
+}
+
+#footer-hero-container {
+  p {
+    font-size: 0.8em;
+  }
+  a, a:hover {
+    color: white;
+  }
+}
+
+.price-tag {
+  display: inline-block;
+
+  width: auto;
+  height: 38px;
+
+  background-color: #888;
+  -webkit-border-radius: 3px 4px 4px 3px;
+  -moz-border-radius: 3px 4px 4px 3px;
+  border-radius: 3px 4px 4px 3px;
+
+  border-left: 1px solid #888;
+
+  /* This makes room for the triangle */
+  margin-left: 32px;
+
+  position: relative;
+
+  color: white;
+  font-weight: 300;
+  // font-family: 'Source Sans Pro', sans-serif;
+  font-size: 22px;
+  line-height: 38px;
+
+  padding: 0 10px 0 10px;
+
+  font-family: 'Carter One', cursive;
+  font-size: 1.4em;
+}
+
+/* Makes the triangle */
+.price-tag:before {
+  content: "";
+  position: absolute;
+  display: block;
+  left: -19px;
+  width: 0;
+  height: 0;
+  border-top: 19px solid transparent;
+  border-bottom: 19px solid transparent;
+  border-right: 19px solid #888;
+}
+
+/* Makes the circle */
+.price-tag:after {
+  content: "";
+  background-color: white;
+  border-radius: 50%;
+  width: 4px;
+  height: 4px;
+  display: block;
+  position: absolute;
+  left: -9px;
+  top: 17px;
+}
+
+@include mobile {
+  #header-hero-container {
+    text-align: center;
+    .brand {
+      font-size: 2em;
+    }
+  }
+  .price-tag {
+    margin-left: 16px;
+    font-size: 1em;
+  }
+  #help-hero-container {
+    margin-top: 192px;
   }
 }

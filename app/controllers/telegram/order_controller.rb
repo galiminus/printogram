@@ -215,5 +215,6 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
         filename: "sticker-#{ sticker_message["file_id"]}.webp"
       }
     )
+    image.create_pwinty_image! # May be fixed in 6.0.1
   end
 end
