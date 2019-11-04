@@ -105,6 +105,8 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
           ]
         ]
       }
+    else
+      respond_with :message, text: render("no_match"), parse_mode: "HTML"
     end
   end
 
