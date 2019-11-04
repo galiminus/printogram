@@ -40,7 +40,7 @@ section#help-hero-container
               p.heading 3
               p.title Stick them everywhere
               = image_tag "screenshot_3.jpg", id: "screenshot"
-        .content.has-text-white.has-text-centered
+        .content.has-text-white.has-text-centered.is-hidden-mobile
             = link_to "https://t.me/#{Rails.application.credentials.telegram[:order_bot_name]}?start=start", class: 'button is-rounded is-info is-large' do
               span
                 | GET STARTED ON TELEGRAM
