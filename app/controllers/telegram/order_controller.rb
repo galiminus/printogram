@@ -212,6 +212,10 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
     end
   end
 
+  def error!(data = nil)
+    raise ActiveRecord::RecordNotFound
+  end
+
   def edit_cart_keyboard(page)
     page_size = 5
     before_page = { text: "«", callback_data: "SET_CART_PAGE_#{page - 1}" } if page > 1
