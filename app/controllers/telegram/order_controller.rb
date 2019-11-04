@@ -213,7 +213,7 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
   end
 
   def error!(data = nil)
-    raise ActiveRecord::RecordNotFound
+    raise RuntimeError
   end
 
   def edit_cart_keyboard(page)
