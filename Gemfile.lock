@@ -130,6 +130,9 @@ GEM
     eu_central_bank (1.4.2)
       money (~> 6.13)
       nokogiri (~> 1.8)
+    exception_notification (4.4.0)
+      actionmailer (>= 4.0, < 7)
+      activesupport (>= 4.0, < 7)
     execjs (2.7.0)
     ffi (1.11.1)
     font-awesome-sass (5.9.0)
@@ -366,6 +369,7 @@ DEPENDENCIES
   countries
   devise
   eu_central_bank
+  exception_notification
   font-awesome-sass (~> 5.9.0)
   image_processing (~> 1.2)
   jbuilder (~> 2.7)
