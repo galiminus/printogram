@@ -52,7 +52,8 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
       @customer.draft_order.update({
         telegram_payment_charge_reference: message["successful_payment"]["telegram_payment_charge_id"],
         provider_payment_charge_reference: message["successful_payment"]["provider_payment_charge_id"],
-        state: "closed"
+        state: "closed",
+        closed_at: DateTime.now
       })
       return respond_with :message, text: render("successful_payment"), parse_mode: "HTML"
 
@@ -182,6 +183,14 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
 
   def start!(data = nil, *)
     respond_with :message, text: render("welcome"), parse_mode: "HTML"
+  end
+
+  def terms!(data = nil)
+    respond_with :message, text: render("terms_and_conditions"), parse_mode: "HTML"
+  end
+
+  def history!(data = nil)
+    respond_with :message, text: render("history"), parse_mode: "HTML"
   end
 
   def checkout!(data = nil, *)

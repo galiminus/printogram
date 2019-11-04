@@ -1,6 +1,6 @@
 You can send me another sticker or sticker set, or proceed to checkout.
 
-<b>Cart - <%= customer.draft_order.formatted_price %></b>
+<b>Cart - <%= Money.new(customer.draft_order.price, "USD").format(symbol: '$') %></b>
 /edit - delete some stickers
 /clear - clear your shopping cart
 /checkout - proceed to checkout

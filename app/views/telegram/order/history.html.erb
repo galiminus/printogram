@@ -1,0 +1,9 @@
+<% if customer.orders.empty? %>
+You don't have any previous orders.
+<% else %>
+  <% customer.orders.where(state: "closed").each do |order| %>
+  Order <b><%= order.reference %></b> - <%= order.closed_at&.strftime("%b %d, %Y") %> - <%= pluralize(order.images.count, 'sticker') %>, <b><%= Money.new(order.final_price, "USD").format(symbol: '$') %></b>
+  <% end %>
+<% end %>
+
+<%= render partial: "telegram/order/main_menu", locals: { customer: customer } %>

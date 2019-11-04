@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_11_04_163749) do
+ActiveRecord::Schema.define(version: 2019_11_04_193051) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -111,6 +111,7 @@ ActiveRecord::Schema.define(version: 2019_11_04_163749) do
     t.integer "final_price"
     t.string "telegram_payment_charge_reference"
     t.string "provider_payment_charge_reference"
+    t.datetime "closed_at"
     t.index ["customer_id"], name: "index_orders_on_customer_id"
     t.index ["state"], name: "index_orders_on_state"
   end

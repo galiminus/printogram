@@ -31,7 +31,7 @@ class Order < ApplicationRecord
   }
 
   def reference
-    Zlib::crc32("#{id}#{customer.telegram_id}")
+    "#{customer.telegram_id}-#{id}"
   end
 
   def token
@@ -44,10 +44,6 @@ class Order < ApplicationRecord
 
   def price
     images.map { |image| image.product.price }.sum
-  end
-
-  def formatted_price
-    Money.new(self.price, "USD").format(symbol: '$')
   end
 
   def update_pwinty_order
