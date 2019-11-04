@@ -2,7 +2,9 @@ class Customer < ApplicationRecord
   has_many :orders
 
   def draft_order
-    self.orders.find_or_create_by(state: 'draft')
+    self.orders.find_or_create_by(state: 'draft') do |order|
+      order.customer_name = self.name
+    end
   end
 
   def self.create_from_telegram!(from)

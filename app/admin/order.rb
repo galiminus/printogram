@@ -50,9 +50,8 @@ ActiveAdmin.register Order do
   index do
     selectable_column
     id_column
-    column :customer do |record|
-      record.customer.name
-    end
+    column :customer_name
+    column :state
     column :created_at
     actions
   end

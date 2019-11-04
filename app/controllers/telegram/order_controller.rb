@@ -48,7 +48,15 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
         respond_with :message, text: render("sticker_added"), parse_mode: "HTML"
       end
 
-    elsif message["text"].match(/^https:\/\/t.me\/addstickers\/.+$/)
+    elsif message["successful_payment"].present?
+      @customer.draft_order.update({
+        telegram_payment_charge_reference: message["successful_payment"]["telegram_payment_charge_id"],
+        provider_payment_charge_reference: message["successful_payment"]["provider_payment_charge_id"],
+        state: "closed"
+      })
+      return respond_with :message, text: render("successful_payment"), parse_mode: "HTML"
+
+    elsif message["text"].present? && message["text"].match(/^https:\/\/t.me\/addstickers\/.+$/)
       set_name = message["text"].match(/^https:\/\/t.me\/addstickers\/(.+)$/)[1]
       response = self.bot.get_sticker_set(name: set_name)
 
@@ -81,7 +89,7 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
         respond_with :photo, photo: cart, caption: render("sticker_added"), parse_mode: "HTML"
       end
 
-    elsif message["text"].match(/[0-9]+/)
+    elsif message["text"].present? && message["text"].match(/[0-9]+/)
       index = message["text"].to_i
       image = @customer.draft_order.images.order(created_at: :asc).to_a[index - 1]
 
@@ -175,19 +183,22 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
   end
 
   def checkout!(data = nil, *)
-    respond_with(:invoice, {
-      title: "Checkout",
-      description: "Please enter your shipping and payment information. The process is fully handled by Telegram and your private payment information will never be shared with us.",
-      provider_token: Rails.application.credentials.stripe[:telegram_token],
-      currency: "USD",
-      start_parameter: "checkout",
-      prices: [{ label: "#{@customer.draft_order.images.count} stickers", amount: @customer.draft_order.price }],
-      need_name: true,
-      need_shipping_address: true,
-      payload: JSON.dump({ order_id: @customer.draft_order.id }),
-      is_flexible: true,
-
-    })
+    if @customer.draft_order.images.empty?
+      respond_with :message, text: render("empty_order_error"), parse_mode: "HTML"
+    else
+      respond_with(:invoice, {
+        title: "Checkout",
+        description: "Please enter your shipping and payment information. The process is fully handled by Telegram and your private payment information will never be shared with us.",
+        provider_token: Rails.application.credentials.stripe[:telegram_token],
+        currency: "USD",
+        start_parameter: "checkout",
+        prices: [{ label: "#{@customer.draft_order.images.count} stickers", amount: @customer.draft_order.price }],
+        need_name: true,
+        need_shipping_address: true,
+        payload: JSON.dump({ order_id: @customer.draft_order.id }),
+        is_flexible: true,
+      })
+    end
   end
 
   def edit_cart_keyboard(page)
@@ -218,7 +229,7 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
     options = {
       shipping_options: @customer.draft_order.shipping_options.map do |shipping_method, shipping_option|
         {
-          id: Digest::SHA1.hexdigest("#{shipping_method}-#{shipping_option["shipments"].first["carrier"]}"),
+          id: shipping_method,
           title: "#{shipping_method} - ETA #{Time.parse(shipping_option["shipments"].first["earliestEstimatedArrivalDate"]).strftime("%b %d")}",
           prices: [
             {
@@ -230,6 +241,23 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
       end
     }
     answer_shipping_query(true, options)
+  end
+
+  def pre_checkout_query(data = nil)
+    @customer.draft_order.update({
+      country_code: data["order_info"]["shipping_address"]["country_code"],
+      address1: data["order_info"]["shipping_address"]["street_line1"],
+      address2: data["order_info"]["shipping_address"]["street_line2"],
+      address_town_or_city: data["order_info"]["shipping_address"]["city"],
+      state_or_county: data["order_info"]["shipping_address"]["state"],
+      postal_or_zip_code: data["order_info"]["shipping_address"]["post_code"],
+      preferred_shipping_method: data["shipping_option_id"],
+      customer_name: data["order_info"]["name"],
+      final_price: data["total_amount"],
+      currency: data["currency"]
+    })
+
+    answer_pre_checkout_query(true, {})
   end
 
   protected
