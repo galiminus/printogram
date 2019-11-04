@@ -67,4 +67,4 @@ gem 'activeadmin', '2.4.0'
 gem 'devise'
 gem 'paper_trail'
 gem 'exception_notification'
-
+gem 'redis-semaphore'
