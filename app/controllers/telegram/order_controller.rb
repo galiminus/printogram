@@ -152,10 +152,14 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
   end
 
   def continue!(data = nil)
-    respond_with :message, text: render("continue"), parse_mode: "HTML"
+    if @customer.draft_order.images.empty?
+      respond_with :message, text: render("empty_order_error"), parse_mode: "HTML"
+    else
+      respond_with :message, text: render("continue"), parse_mode: "HTML"
 
-    @customer.draft_order.cart.open do |cart|
-      respond_with :photo, photo: cart, caption: render("clear_order_cancelled"), parse_mode: "HTML"
+      @customer.draft_order.cart.open do |cart|
+        respond_with :photo, photo: cart, caption: render("clear_order_cancelled"), parse_mode: "HTML"
+      end
     end
   end
 
