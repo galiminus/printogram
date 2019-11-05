@@ -317,6 +317,6 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
   end
 
   def semaphore(prefix)
-    Redis::Semaphore.new("#{prefix}_#{chat["id"]}", stale_client_timeout: 12, expiration: 12, resources: 10)
+    Redis::Semaphore.new("#{prefix}_#{chat["id"]}", stale_client_timeout: 30, expiration: 3600, resources: 8)
   end
 end
