@@ -49,7 +49,7 @@ class Order < ApplicationRecord
   def update_pwinty_order
     attributes = {
       merchantOrderId: self.id,
-      recipientName: customer.name,
+      recipientName: self.customer_name,
       countryCode: self.country_code,
       preferredShippingMethod: self.preferred_shipping_method,
       address1: self.address1,
@@ -85,7 +85,7 @@ class Order < ApplicationRecord
     shipping_methods.map do |shipping_method|
       Pwinty.update_order(self, {
         merchantOrderId: self.id,
-        recipientName: customer.name,
+        recipientName: self.customer_name,
         countryCode: self.country_code,
         preferredShippingMethod: shipping_method,
         address1: self.address1,
