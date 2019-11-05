@@ -35,25 +35,27 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
         return respond_with :message, text: render("animated_sticker_error"), parse_mode: "HTML"
       end
 
+      session_key = "#{@customer.draft_order.id}_sticker_added_at"
+      if session[session_key].present? && session[session_key] > 12.seconds.ago
+        return respond_with :message, text: render("saving_sticker_error"), parse_mode: "HTML"
+      end
+
       respond_with :message, text: render("sticker_loading"), parse_mode: "HTML"
 
-      add_sticker_semaphore = semaphore("add_sticker")
       begin
-        add_sticker_semaphore.lock
+        session[session_key] = Time.now
         add_sticker(message["sticker"])
-      ensure
-        available_count = add_sticker_semaphore.unlock
-        if available_count == add_sticker_semaphore.as_json["resource_count"]
-          BuildCartJob.perform_now(@customer.draft_order)
+        BuildCartJob.perform_now(@customer.draft_order)
 
-          if @customer.draft_order.images.count > 1
-            @customer.draft_order.cart.open do |cart|
-              respond_with :photo, photo: cart, caption: render("sticker_added"), parse_mode: "HTML"
-            end
-          else
-            respond_with :message, text: render("sticker_added"), parse_mode: "HTML"
+        if @customer.draft_order.images.count > 1
+          @customer.draft_order.cart.open do |cart|
+            respond_with :photo, photo: cart, caption: render("sticker_added"), parse_mode: "HTML"
           end
+        else
+          respond_with :message, text: render("sticker_added"), parse_mode: "HTML"
         end
+      ensure
+        session[session_key] = nil
       end
 
     elsif message["successful_payment"].present?
@@ -314,9 +316,5 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
       }
     )
     image.create_pwinty_image! # May be fixed in 6.0.1
-  end
-
-  def semaphore(prefix)
-    Redis::Semaphore.new("#{prefix}_#{chat["id"]}", stale_client_timeout: 30, expiration: 3600, resources: 8)
   end
 end
