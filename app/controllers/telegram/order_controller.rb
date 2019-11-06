@@ -35,16 +35,14 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
         return respond_with :message, text: render("animated_sticker_error"), parse_mode: "HTML"
       end
 
-      session_key = "sticker_added_at"
-      if session[session_key].present? && session[session_key].to_i > 12.seconds.ago.to_i
+      if processing_sticker?
         return respond_with :message, text: render("saving_sticker_error"), parse_mode: "HTML"
       end
-      ExceptionNotifier.notify_exception(Exception.new, data: { session_key: session_key, value: session[session_key] })
 
       respond_with :message, text: render("sticker_loading"), parse_mode: "HTML"
 
       begin
-        session[session_key] = DateTime.now.to_i
+        processing_sticker!
         add_sticker(message["sticker"])
         BuildCartJob.perform_now(@customer.draft_order)
 
@@ -56,7 +54,7 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
           respond_with :message, text: render("sticker_added"), parse_mode: "HTML"
         end
       ensure
-        session[session_key] = nil
+        processed_sticker!
       end
 
     elsif message["successful_payment"].present?
@@ -327,7 +325,23 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
     end
   end
 
-  def session_key
-    "#{@customer.draft_order.id}"
+  def redis_connection
+    @redis_connection ||= Redis.new
+  end
+
+  def processing_sticker_key
+    "#{@customer.draft_order.id}_processing_sticker"
+  end
+
+  def processing_sticker!
+    redis_connection.set(processing_sticker_key, DateTime.now.to_i)
+  end
+
+  def processing_sticker?
+    redis_connection.get(processing_sticker_key).to_i > 12.seconds.ago.to_i
+  end
+
+  def processed_sticker!
+    redis_connection.del(processing_sticker_key)
   end
 end
