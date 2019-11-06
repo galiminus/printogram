@@ -19,7 +19,6 @@ class Image < ApplicationRecord
   def download!
     save_to_cache do |local_path|
       unless File.exists?(local_path)
-        byebug
         system("curl -s #{document.service_url.shellescape} --output #{local_path}")
       end
     end
