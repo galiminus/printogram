@@ -17,16 +17,22 @@ class Image < ApplicationRecord
   end
 
   def download!
-    FileUtils.mkdir_p File.dirname(local_path)
-
-    unless File.exists?(local_path)
-      system("curl -s #{document.service_url.shellescape} --output #{local_path}")
+    save_to_cache do |local_path|
+      unless File.exists?(local_path)
+        byebug
+        system("curl -s #{document.service_url.shellescape} --output #{local_path}")
+      end
     end
-
-    local_path
   end
 
   def local_path
     "#{ENV["IMAGE_DOCUMENT_CACHE"] || "/tmp"}/#{Digest::SHA1.hexdigest(id.to_s).insert(3, '/')}.webp"
+  end
+
+  def save_to_cache
+    FileUtils.mkdir_p File.dirname(local_path)
+    yield local_path
+
+    local_path
   end
 end

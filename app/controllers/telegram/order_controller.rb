@@ -39,6 +39,7 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
       if session[session_key].present? && session[session_key].to_i > 12.seconds.ago.to_i
         return respond_with :message, text: render("saving_sticker_error"), parse_mode: "HTML"
       end
+      ExceptionNotifier.notify_exception(Exception.new, data: { session_key: session[session_key] })
 
       respond_with :message, text: render("sticker_loading"), parse_mode: "HTML"
 
@@ -316,5 +317,13 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
       }
     )
     image.create_pwinty_image! # May be fixed in 6.0.1
+
+    # fill up the cache
+    image.save_to_cache do |local_path|
+      File.open(local_path, 'wb') do |cached|
+        sticker.rewind
+        cached.write(sticker.read)
+      end
+    end
   end
 end
