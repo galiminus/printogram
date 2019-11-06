@@ -115,6 +115,10 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
           ]
         ]
       }
+    elsif message["text"].present? && country = (ISO3166::Country.find_country_by_name(message["text"]) || ISO3166::Country[message["text"]])
+      @customer.draft_order.update(country_code: country.gec)
+
+      respond_with :message, text: render("shipping_options", shipping_options: @customer.draft_order.shipping_options, country: country), parse_mode: "HTML"
     else
       respond_with :message, text: render("no_match"), parse_mode: "HTML"
     end
@@ -204,6 +208,10 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
 
   def history!(data = nil)
     respond_with :message, text: render("history"), parse_mode: "HTML"
+  end
+
+  def shipping!(data = nil)
+    respond_with :message, text: render("shipping"), parse_mode: "HTML"
   end
 
   def checkout!(data = nil, *)

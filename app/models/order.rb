@@ -94,9 +94,13 @@ class Order < ApplicationRecord
         stateOrCounty: self.state_or_county,
         postalOrZipCode: self.postal_or_zip_code
       })
-      response = Pwinty.get_order(self)
+      shipping_info = JSON.parse(Pwinty.get_order(self).body)["data"]["shippingInfo"]
 
-      [shipping_method, JSON.parse(response.body)["data"]["shippingInfo"]]
-    end.to_h
+      if shipping_info["price"] > 0
+        [shipping_method, shipping_info]
+      else
+        nil
+      end
+    end.compact.to_h
   end
 end
