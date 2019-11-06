@@ -36,14 +36,14 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
       end
 
       session_key = "#{@customer.draft_order.id}_sticker_added_at"
-      if session[session_key].present? && session[session_key].to_datetime > 12.seconds.ago.to_datetime
+      if session[session_key].present? && session[session_key].to_i > 12.seconds.ago.to_i
         return respond_with :message, text: render("saving_sticker_error"), parse_mode: "HTML"
       end
 
       respond_with :message, text: render("sticker_loading"), parse_mode: "HTML"
 
       begin
-        session[session_key] = DateTime.now
+        session[session_key] = DateTime.now.to_i
         add_sticker(message["sticker"])
         BuildCartJob.perform_now(@customer.draft_order)
 
