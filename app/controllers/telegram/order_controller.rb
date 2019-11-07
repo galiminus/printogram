@@ -305,7 +305,7 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
           prices: [
             {
               label: "#{shipping_method} shipping",
-              amount: shipping_option["price"].to_s
+              amount: shipping_option["usd_price"].to_s
             }
           ]
         }

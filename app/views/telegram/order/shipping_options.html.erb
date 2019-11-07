@@ -2,7 +2,7 @@
 Current shipping options for <b><%= country.name %></b>.
 
 <% shipping_options.each do |shipping_option, details| %>
-<b><%= shipping_option %> - <%= Money.new(details["price"], "USD").format(symbol: '$') %></b>
+<b><%= shipping_option %> - <%= Money.new(details["usd_price"], "USD").format(symbol: '$') %></b>
 Operated by <i><%= details["shipments"].first["carrier"] %></i>
 Estimated date of arrival <i><%= DateTime.parse(details["shipments"].first["latestEstimatedArrivalDate"]).strftime("%B %d") %></i>
 

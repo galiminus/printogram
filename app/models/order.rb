@@ -98,6 +98,9 @@ class Order < ApplicationRecord
       shipping_info = JSON.parse(Pwinty.get_order(self).body)["data"]["shippingInfo"]
 
       if shipping_info["price"] > 0
+        # Convert price to USD
+        shipping_info["usd_price"] = Money.new(shipping_info["price"], ENV["PWINTY_ACCOUNT_CURRENCY"] || "EUR").exchange_to("USD")
+
         [shipping_method, shipping_info]
       else
         nil

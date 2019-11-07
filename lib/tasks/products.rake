@@ -1,8 +1,5 @@
 namespace :products do
   task refresh_prices: :environment do
-    Money.default_bank = EuCentralBank.new
-    Money.default_bank.update_rates
-
     Product.find_each do |product|
       begin
         price = Pwinty.prices(country_code: "US", skus: [product.sku])["prices"].first
