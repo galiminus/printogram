@@ -12,6 +12,7 @@ ActiveAdmin.register Order do
     :postal_or_zip_code,
     :preferred_shipping_method,
     :customer_id,
+    :coupon_id,
     images_attributes: [:document, :created_at, :updated_at]
   ]
 
@@ -85,6 +86,7 @@ ActiveAdmin.register Order do
   form do |f|
     f.inputs "Associations" do
       f.input :customer
+      f.input :coupon
     end
 
     f.inputs "Order Details" do

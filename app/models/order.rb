@@ -16,6 +16,7 @@ class Order < ApplicationRecord
   PWINTY_SHIPPING_METHODS = %w{Budget Standard}
 
   belongs_to :customer
+  belongs_to :coupon, optional: true
   has_many :images, dependent: :destroy
   accepts_nested_attributes_for :images, allow_destroy: true
 
@@ -43,7 +44,11 @@ class Order < ApplicationRecord
   end
 
   def price
-    images.map { |image| image.product.price }.sum
+    prices = images.group_by(&:product).map do |product, images|
+      [ product, [0, images.count - (coupon.present? && coupon.product == product ? coupon.count : 0)].max ]
+    end.sum do |product, count|
+      product.price * count
+    end
   end
 
   def update_pwinty_order
@@ -69,10 +74,6 @@ class Order < ApplicationRecord
     self.update(pwinty_reference: JSON.parse(response.body)["data"]["id"])
 
     JSON.parse(response)
-  end
-
-  def sync_pwinty_order_from_attributes
-
   end
 
   def cancel_pwinty_order

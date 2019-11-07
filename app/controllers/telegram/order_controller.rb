@@ -13,6 +13,9 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
   CONFIRM_DELETE_IMAGE = "Delete"
   CANCEL_DELETE_IMAGE = "Cancel"
 
+  CONFIRM_REMOVE_COUPON = "Remove"
+  CANCEL_REMOVE_COUPON = "Cancel"
+
   DONE_EDIT = "« Back"
 
   rescue_from Exception do |error|
@@ -99,7 +102,17 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
         respond_with :photo, photo: cart, caption: render("sticker_added"), parse_mode: "HTML"
       end
 
-    elsif message["text"].present? && message["text"].match(/[0-9]+/)
+    elsif message["text"].present? && country = (ISO3166::Country.find_country_by_name(message["text"]) || ISO3166::Country[message["text"]])
+      @customer.draft_order.update(country_code: country.gec)
+
+      respond_with :message, text: render("shipping_options", shipping_options: @customer.draft_order.shipping_options, country: country), parse_mode: "HTML"
+
+    elsif message["text"].present? && coupon = Coupon.find_by(code: message["text"].strip.upcase)
+      @customer.draft_order.update(coupon: coupon)
+
+      respond_with :message, text: render("coupon_saved"), parse_mode: "HTML"
+
+    elsif message["text"].present? && message["text"].match(/^[0-9]+$/)
       index = message["text"].to_i
       image = @customer.draft_order.images.order(created_at: :asc).to_a[index - 1]
 
@@ -115,10 +128,7 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
           ]
         ]
       }
-    elsif message["text"].present? && country = (ISO3166::Country.find_country_by_name(message["text"]) || ISO3166::Country[message["text"]])
-      @customer.draft_order.update(country_code: country.gec)
 
-      respond_with :message, text: render("shipping_options", shipping_options: @customer.draft_order.shipping_options, country: country), parse_mode: "HTML"
     else
       respond_with :message, text: render("no_match"), parse_mode: "HTML"
     end
@@ -127,17 +137,25 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
   def callback_query(data = nil)
     bot.delete_message chat_id: chat["id"], message_id: payload["message"]["message_id"]
 
-    if data == "CONTINUE_ORDER" || data == "CANCEL_CLEAR_ORDER" || data == "DONE_EDIT"
+    if data == "CONTINUE_ORDER" || data == "CANCEL_CLEAR_ORDER" || data == "DONE_EDIT" || data == "KEEP_COUPON"
       respond_with :message, text: render("clear_order_cancelled"), parse_mode: "HTML"
+
     elsif data == "START_NEW_ORDER"
       @customer.draft_order.destroy
       respond_with :message, text: render("new_order_started"), parse_mode: "HTML"
+
+    elsif data == "REMOVE_COUPON"
+      @customer.draft_order.update(coupon: nil)
+      respond_with :message, text: render("coupon_removed"), parse_mode: "HTML"
+
     elsif data == "CONFIRM_CLEAR_ORDER"
       @customer.draft_order.destroy
       respond_with :message, text: render("order_cleared"), parse_mode: "HTML"
+
     elsif data.match(/^SET_CART_PAGE_/)
       page = data.match(/^SET_CART_PAGE_([0-9]+)$/)[1]
       edit_cart_keyboard(page.to_i)
+
     elsif data.match(/^DELETE_IMAGE_/)
       id, index = data.match(/^DELETE_IMAGE_([0-9]+)_([0-9]+)$/)[1..2]
 
@@ -217,6 +235,8 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
   def checkout!(data = nil, *)
     if @customer.draft_order.images.empty?
       respond_with :message, text: render("empty_order_error"), parse_mode: "HTML"
+    elsif @customer.draft_order.price == 0
+      respond_with :message, text: render("missing_paid_items_error"), parse_mode: "HTML"
     else
       respond_with(:invoice, {
         title: "Checkout",
@@ -230,6 +250,21 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
         payload: JSON.dump({ order_id: @customer.draft_order.id }),
         is_flexible: true,
       })
+    end
+  end
+
+  def coupon!(data = nil)
+    if @customer.draft_order.coupon.present?
+      respond_with :message, text: render("remove_coupon"), parse_mode: "HTML", reply_markup: {
+        inline_keyboard: [
+          [
+            { text: CONFIRM_REMOVE_COUPON, callback_data: "REMOVE_COUPON" },
+            { text: CANCEL_REMOVE_COUPON, callback_data: "KEEP_COUPON" },
+          ]
+        ]
+      }
+    else
+      respond_with :message, text: render("coupon"), parse_mode: "HTML"
     end
   end
 

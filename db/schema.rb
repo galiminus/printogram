@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_11_04_193051) do
+ActiveRecord::Schema.define(version: 2019_11_07_075917) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -60,6 +60,15 @@ ActiveRecord::Schema.define(version: 2019_11_04_193051) do
     t.datetime "updated_at", precision: 6, null: false
     t.index ["email"], name: "index_admin_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_admin_users_on_reset_password_token", unique: true
+  end
+
+  create_table "coupons", force: :cascade do |t|
+    t.string "code"
+    t.integer "count"
+    t.bigint "product_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["product_id"], name: "index_coupons_on_product_id"
   end
 
   create_table "customers", force: :cascade do |t|
@@ -112,6 +121,8 @@ ActiveRecord::Schema.define(version: 2019_11_04_193051) do
     t.string "telegram_payment_charge_reference"
     t.string "provider_payment_charge_reference"
     t.datetime "closed_at"
+    t.bigint "coupon_id"
+    t.index ["coupon_id"], name: "index_orders_on_coupon_id", unique: true
     t.index ["customer_id"], name: "index_orders_on_customer_id"
     t.index ["state"], name: "index_orders_on_state"
   end

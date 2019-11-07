@@ -1,10 +1,16 @@
 You can send me another sticker or sticker set, or proceed to checkout.
 
-<b>Cart - <%= Money.new(customer.draft_order.price, "USD").format(symbol: '$') %></b>
+<b>Cart - <%= Money.new(customer.draft_order.price, "USD").format(symbol: '$') %></b><%= customer.draft_order.coupon.present? ? " (#{customer.draft_order.coupon.as_words})" : "" %>
 /edit - delete some stickers
 /clear - clear your shopping cart
-/checkout - proceed to checkout
 /shipping - see shipping options
+<% if customer.draft_order.coupon.present? %>
+/coupon - edit your coupon
+<% else %>
+/coupon - add coupon
+<% end %>
+
+/checkout - proceed to checkout
 
 <b>More</b>
 /start - Go to the main menu
