@@ -301,7 +301,7 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
       shipping_options: @customer.draft_order.shipping_options.map do |shipping_method, shipping_option|
         {
           id: shipping_method,
-          title: "#{shipping_method} - ETA #{Time.parse(shipping_option["shipments"].first["earliestEstimatedArrivalDate"]).strftime("%b %d")}",
+          title: "#{shipping_method} - ETA #{Time.parse(shipping_option["shipments"].first["latestEstimatedArrivalDate"]).strftime("%b %d")}",
           prices: [
             {
               label: "#{shipping_method} shipping",
