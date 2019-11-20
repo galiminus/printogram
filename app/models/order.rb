@@ -34,10 +34,14 @@ class Order < ApplicationRecord
   after_save :update_pwinty_order, if: -> {
     PWINTY_ATTRIBUTES.any? { |attribute| saved_change_to_attribute?(attribute) }
   }
+  after_save :submit_pwinty_order, if: -> {
+    previous_changes["state"] == ["draft", "closed"]
+  }
 
   after_destroy :cancel_pwinty_order, if: -> {
     pwinty_reference.present?
   }
+
 
   def reference
     "#{customer.telegram_id}-#{id}"
@@ -86,6 +90,10 @@ class Order < ApplicationRecord
 
   def cancel_pwinty_order
     Pwinty.update_order_status(self, { status: "Cancelled" })
+  end
+
+  def submit_pwinty_order
+    Pwinty.update_order_status(self, { status: "Submitted" })
   end
 
   def shipping_options
