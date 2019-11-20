@@ -119,7 +119,9 @@ class Order < ApplicationRecord
 
         # Rename the carrier
         normalized_shipping_info["carrier"] =
-          if shipping_info["shipments"].first["carrier"].match(/UK .* Postal Service/i)
+          if shipping_info["shipments"].first["carrier"].blank?
+            "UK Postal Service"
+          elsif shipping_info["shipments"].first["carrier"].match(/UK .* Postal Service/i)
             "UK Postal Service"
           else
             shipping_info["shipments"].first["carrier"]
