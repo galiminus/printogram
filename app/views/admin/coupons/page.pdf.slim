@@ -1,0 +1,20 @@
+header#header-hero-container
+  .hero.is-info.is-small.is-bold
+    .hero-body
+      .container
+        .level
+          .level-left
+            .level-item
+              .content
+                h1.title.brand
+                  = Rails.configuration.site_name.upcase
+                #service-description
+                  | Turn <b>Telegram</b> stickers into real stickers
+
+          .level-right
+            .level-item.is-hidden-mobile
+                .price-tag
+                  = "#{Money.new(Product.first.price, "USD").format(symbol: '$')} per sticker"
+
+section#help-hero-container
+  = @coupon.code

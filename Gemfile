@@ -68,3 +68,6 @@ gem 'devise'
 gem 'paper_trail'
 gem 'exception_notification'
 gem 'rack-cors'
+gem 'wicked_pdf'
+gem 'wkhtmltopdf-binary'
+

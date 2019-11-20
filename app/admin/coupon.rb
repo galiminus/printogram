@@ -15,6 +15,24 @@ ActiveAdmin.register Coupon do
     actions
   end
 
+  member_action :page, method: :get do
+    @coupon = Coupon.find(params[:id])
+
+    respond_to do |format|
+      format.html do
+        render "admin/coupons/page.pdf.slim", layout: "application.html.slim"
+      end
+
+      format.pdf do
+        render "admin/coupons/page", layout: "application.html.slim", file_name: "coupon_#{params[:id]}.pdf"
+      end
+    end
+  end
+
+  action_item :page, only: [:show, :edit] do
+    link_to "Page", page_admin_coupon_path(id: params[:id], format: "pdf")
+  end
+
   form do |f|
     f.inputs "Associations" do
       f.input :product
