@@ -301,10 +301,10 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
       shipping_options: @customer.draft_order.shipping_options.map do |shipping_method, shipping_option|
         {
           id: shipping_method,
-          title: "#{shipping_method} - ETA #{Time.parse(shipping_option["shipments"].first["latestEstimatedArrivalDate"]).strftime("%b %d")}",
+          title: "#{shipping_option["shipping_method"]} - ETA #{shipping_option["estimated_arrival_date"].strftime("%b %d")}",
           prices: [
             {
-              label: "#{shipping_method} shipping",
+              label: "#{shipping_option["shipping_method"]} shipping",
               amount: shipping_option["usd_price"].to_s
             }
           ]

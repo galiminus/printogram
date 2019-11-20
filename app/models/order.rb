@@ -13,7 +13,15 @@ class Order < ApplicationRecord
     postal_or_zip_code
   }
 
-  PWINTY_SHIPPING_METHODS = %w{Budget Standard}
+  PWINTY_SHIPPING_METHODS = %w{Budget}
+  PWINTY_SHIPPING_ETA = {
+    "Budget" => 2.weeks.from_now,
+    "Standard" => 1.week.from_now,
+  }
+  PWINTY_SHIPPING_NAME_OVERRIDE = {
+    "Budget" => "Standard",
+    "Standard" => "Premium"
+  }
 
   belongs_to :customer
   belongs_to :coupon, optional: true
@@ -98,10 +106,26 @@ class Order < ApplicationRecord
       shipping_info = JSON.parse(Pwinty.get_order(self).body)["data"]["shippingInfo"]
 
       if shipping_info["price"] > 0
-        # Convert price to USD
-        shipping_info["usd_price"] = Money.new(shipping_info["price"], ENV["PWINTY_ACCOUNT_CURRENCY"] || "EUR").exchange_to("USD")
+        normalized_shipping_info = {}
 
-        [shipping_method, shipping_info]
+        # Convert price to USD
+        normalized_shipping_info["usd_price"] = Money.new(shipping_info["price"], ENV["PWINTY_ACCOUNT_CURRENCY"] || "EUR").exchange_to("USD").cents
+
+        # The API seems to only provide ETA from the same country, so it's probably better to use our own
+        normalized_shipping_info["estimated_arrival_date"] = PWINTY_SHIPPING_ETA[shipping_method] || DateTime.parse(details["shipments"].first["latestEstimatedArrivalDate"])
+
+        # Rename the shipping option, budget is too cheap
+        normalized_shipping_info["shipping_method"] = PWINTY_SHIPPING_NAME_OVERRIDE[shipping_method] || shipping_method
+
+        # Rename the carrier
+        normalized_shipping_info["carrier"] =
+          if shipping_info["shipments"].first["carrier"].match(/UK .* Postal Service/i)
+            "UK Postal Service"
+          else
+            shipping_info["shipments"].first["carrier"]
+          end
+
+        [shipping_method, normalized_shipping_info]
       else
         nil
       end
