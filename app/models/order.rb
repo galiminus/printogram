@@ -90,6 +90,8 @@ class Order < ApplicationRecord
 
   def cancel_pwinty_order
     Pwinty.update_order_status(self, { status: "Cancelled" })
+  rescue => error
+    ExceptionNotifier.notify_exception(error)
   end
 
   def submit_pwinty_order

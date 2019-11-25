@@ -24,7 +24,13 @@ ActiveAdmin.register Coupon do
       end
 
       format.pdf do
-        render "admin/coupons/page", layout: "application.html.slim", file_name: "coupon_#{params[:id]}.pdf"
+        render({
+          pdf: "admin/coupons/page",
+          layout: "application.html.slim",
+          file_name: "coupon_#{params[:id]}.pdf",
+          page_size: "A4",
+          show_as_html: params.key?('debug'),
+        })
       end
     end
   end

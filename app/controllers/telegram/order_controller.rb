@@ -238,9 +238,10 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
     elsif @customer.draft_order.price == 0
       respond_with :message, text: render("missing_paid_items_error"), parse_mode: "HTML"
     else
+      respond_with :message, text: render("terms_and_conditions_reminder"), parse_mode: "HTML"
       respond_with(:invoice, {
         title: "Checkout",
-        description: "Please enter your shipping and payment information. The process is fully handled by Telegram and your private payment information will never be shared with us.",
+        description: "Please enter your payment and shipping information. The process is fully handled by Telegram and your private payment information will never be shared with us.",
         provider_token: Rails.application.credentials.stripe[:telegram_token],
         currency: "USD",
         start_parameter: "checkout",
