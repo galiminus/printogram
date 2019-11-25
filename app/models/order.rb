@@ -15,7 +15,7 @@ class Order < ApplicationRecord
 
   PWINTY_SHIPPING_METHODS = %w{Budget}
   PWINTY_SHIPPING_ETA = {
-    "Budget" => 2.weeks.from_now,
+    "Budget" => 10.days.from_now,
     "Standard" => 1.week.from_now,
   }
   PWINTY_SHIPPING_NAME_OVERRIDE = {
