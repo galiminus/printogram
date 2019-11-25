@@ -3,6 +3,7 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
 
   before_action :set_customer
   before_action :set_product
+  before_action :check_processing
 
   CONTINUE_ORDER = "Continue order"
   START_NEW_ORDER = "Start a new order"
@@ -36,10 +37,6 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
     if message["sticker"].present?
       if message["sticker"]["is_animated"]
         return respond_with :message, text: render("animated_sticker_error"), parse_mode: "HTML"
-      end
-
-      if processing_sticker?
-        return respond_with :message, text: render("saving_sticker_error"), parse_mode: "HTML"
       end
 
       respond_with :message, text: render("sticker_loading"), parse_mode: "HTML"
@@ -159,9 +156,35 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
     elsif data.match(/^DELETE_IMAGE_/)
       id, index = data.match(/^DELETE_IMAGE_([0-9]+)_([0-9]+)$/)[1..2]
 
+      if processing_sticker?
+        return respond_with :message, text: render("saving_sticker_error"), parse_mode: "HTML"
+      end
+
       respond_with :message, text: render("deleting_sticker", index: index.to_i), parse_mode: "HTML"
 
-      @customer.draft_order.images.find(id).destroy
+      begin
+        processing_sticker!
+
+        @customer.draft_order.images.find(id).destroy
+
+        # Create a new draft order
+        order_to_delete = @customer.draft_order
+        new_draft_order = Order.create!(
+          order_to_delete.attributes.merge(id: nil, pwinty_reference: nil)
+        )
+        order_to_delete.images.each do |image|
+          image.update!(order_id: new_draft_order.id, pwinty_reference: nil)
+        end
+        order_to_delete.destroy
+
+        BuildCartJob.perform_now(new_draft_order)
+
+        new_draft_order.images.each do |image|
+          image.create_pwinty_image!
+        end
+      ensure
+        processed_sticker!
+      end
 
       if @customer.draft_order.images.any?
         BuildCartJob.perform_now(@customer.draft_order)
@@ -371,6 +394,14 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
 
   def redis_connection
     @redis_connection ||= Redis.new
+  end
+
+  def check_processing
+    if processing_sticker?
+      respond_with :message, text: render("saving_sticker_error"), parse_mode: "HTML"
+
+      throw :abort
+    end
   end
 
   def processing_sticker_key
