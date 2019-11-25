@@ -161,7 +161,6 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
       end
 
       respond_with :message, text: render("deleting_sticker", index: index.to_i), parse_mode: "HTML"
-
       begin
         processing_sticker!
 
@@ -176,8 +175,6 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
           image.update!(order_id: new_draft_order.id, pwinty_reference: nil)
         end
         order_to_delete.destroy
-
-        BuildCartJob.perform_now(new_draft_order)
 
         new_draft_order.images.each do |image|
           image.create_pwinty_image!
@@ -304,7 +301,7 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
     respond_with :message, text: render("edit"), reply_markup: {
       inline_keyboard: [[{ text: DONE_EDIT, callback_data: "DONE_EDIT" }]] + [
         ([ before_page ] +
-          @customer.draft_order.images.to_a[((page - 1) * page_size), page_size].map.with_index do |image, index|
+          @customer.draft_order.images.order(created_at: :asc).to_a[((page - 1) * page_size), page_size].map.with_index do |image, index|
             { text: ((page - 1) * page_size + index + 1).to_s, callback_data: "DELETE_IMAGE_#{image.id}_#{(page - 1) * page_size + index + 1}" }
           end + [ next_page ]).compact
       ]
