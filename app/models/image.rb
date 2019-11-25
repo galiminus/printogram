@@ -9,9 +9,9 @@ class Image < ApplicationRecord
 
     response = Pwinty.create_image(order, {
       sku: product.sku,
-      url: document.variant(convert: :png).processed.service_url,
+      url: document.variant(resize_and_pad: [512, (512 * (1 / product.scale)).floor], convert: :png).processed.service_url,
       copies: 1,
-      sizing: "ShrinkToFit",
+      sizing: "Crop",
     })
     self.update(pwinty_reference: JSON.parse(response.body)["data"]["id"])
   end
