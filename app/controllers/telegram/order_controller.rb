@@ -303,7 +303,7 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
     options = {
       shipping_options: @customer.draft_order.shipping_options.map do |shipping_option|
         {
-          id: shipping_option["shipping_method"],
+          id: shipping_option["pwinty_shipping_method"],
           title: "#{shipping_option["shipping_method"]} - ETA #{shipping_option["estimated_arrival_date"].strftime("%b %d")}",
           prices: [
             {

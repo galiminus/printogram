@@ -64,7 +64,8 @@ class Order < ApplicationRecord
         "shipping_method" => "Standard",
         "usd_price" => 289,
         "estimated_arrival_date" => 10.days.from_now,
-        "carrier" => "UK Postal Service"
+        "carrier" => "UK Postal Service",
+        "pwinty_shipping_method" => "Budget"
       }
     ]
   end
