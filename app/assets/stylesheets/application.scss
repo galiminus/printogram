@@ -223,6 +223,7 @@ html, body {
   #help-hero-container {
     margin-top: 128px;
     .hero {
+      top: 0;
       position: relative;
       z-index: 0;
       .title {
