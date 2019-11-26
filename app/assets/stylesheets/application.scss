@@ -82,7 +82,7 @@ html, body {
   margin-top: 0px;
   .hero {
     position: absolute;
-    top: calc(78vh - 500px);
+    top: calc(78vh - 450px);
     width: 100%;
     background: transparent;
     z-index: 3;
@@ -121,7 +121,7 @@ html, body {
     text-transform: uppercase;
   }
   .button {
-    margin-top: 50px;
+    margin-top: 20px;
   }
   img {
     max-width: 270px;
