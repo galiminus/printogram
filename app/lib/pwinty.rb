@@ -33,6 +33,10 @@ module Pwinty
     client["orders"][order.pwinty_reference]["images"].post(params)
   end
 
+  def self.create_images(order, params)
+    client["orders"][order.pwinty_reference]["images"]["batch"].post(params)
+  end
+
   def self.check_order_validity(order)
     client["orders"][order.pwinty_reference]["SubmissionStatus"].get
   end

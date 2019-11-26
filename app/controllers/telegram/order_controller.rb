@@ -64,6 +64,7 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
         state: "closed",
         closed_at: DateTime.now
       })
+
       return respond_with :message, text: render("successful_payment"), parse_mode: "HTML"
 
     elsif message["text"].present? && message["text"].match(/^https:\/\/t.me\/addstickers\/.+$/)
@@ -161,27 +162,6 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
       end
 
       respond_with :message, text: render("deleting_sticker", index: index.to_i), parse_mode: "HTML"
-      begin
-        processing_sticker!
-
-        @customer.draft_order.images.find(id).destroy
-
-        # Create a new draft order
-        order_to_delete = @customer.draft_order
-        new_draft_order = Order.create!(
-          order_to_delete.attributes.merge(id: nil, pwinty_reference: nil)
-        )
-        order_to_delete.images.each do |image|
-          image.update!(order_id: new_draft_order.id, pwinty_reference: nil)
-        end
-        order_to_delete.destroy
-
-        new_draft_order.images.each do |image|
-          image.create_pwinty_image!
-        end
-      ensure
-        processed_sticker!
-      end
 
       if @customer.draft_order.images.any?
         BuildCartJob.perform_now(@customer.draft_order)
@@ -319,9 +299,9 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
     })
 
     options = {
-      shipping_options: @customer.draft_order.shipping_options.map do |shipping_method, shipping_option|
+      shipping_options: @customer.draft_order.shipping_options.map do |shipping_option|
         {
-          id: shipping_method,
+          id: shipping_option["shipping_method"],
           title: "#{shipping_option["shipping_method"]} - ETA #{shipping_option["estimated_arrival_date"].strftime("%b %d")}",
           prices: [
             {
@@ -346,10 +326,15 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
       preferred_shipping_method: data["shipping_option_id"],
       customer_name: data["order_info"]["name"],
       final_price: data["total_amount"],
-      currency: data["currency"]
+      currency: data["currency"],
+      state: "validated"
     })
 
     answer_pre_checkout_query(true, {})
+  rescue => error
+    ExceptionNotifier.notify_exception(error)
+
+    answer_pre_checkout_query(false, { error_message: "There was an unexpected error with your order, please try again later."})
   end
 
   protected
@@ -378,7 +363,7 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
         filename: "sticker-#{ sticker_message["file_id"]}.webp"
       }
     )
-    image.create_pwinty_image! # May be fixed in 6.0.1
+    image.preload_pwinty_variant!
 
     # fill up the cache
     image.save_to_cache do |local_path|

@@ -4,18 +4,6 @@ class Image < ApplicationRecord
 
   has_one_attached :document
 
-  def create_pwinty_image!
-    ActiveStorage.variable_content_types = (ActiveStorage.variable_content_types + ["image/webp"]).uniq # pretty dirty, but well...
-
-    response = Pwinty.create_image(order, {
-      sku: product.sku,
-      url: document.variant(resize_and_pad: [512, (512 * (1 / product.scale)).floor], convert: :png).processed.service_url,
-      copies: 1,
-      sizing: "Crop",
-    })
-    self.update(pwinty_reference: JSON.parse(response.body)["data"]["id"])
-  end
-
   def download!
     save_to_cache do |local_path|
       unless File.exists?(local_path)
@@ -33,5 +21,15 @@ class Image < ApplicationRecord
     yield local_path
 
     local_path
+  end
+
+  def pwinty_variant
+    ActiveStorage.variable_content_types = (ActiveStorage.variable_content_types + ["image/webp"]).uniq # pretty dirty, but well...
+
+    document.variant(resize_and_pad: [512, (512 * (1 / product.scale)).floor], convert: :png)
+  end
+
+  def preload_pwinty_variant!
+    pwinty_variant.processed
   end
 end
