@@ -111,6 +111,13 @@ footer#footer-hero-container
             div
               p= link_to "mailto:contact@#{Rails.application.credentials.smtp[:domain]}", class: '' do
                 = "contact@#{Rails.application.credentials.smtp[:domain]}".upcase
+          .level-item.has-text-centered
+            div
+              p
+               | MADE WITH
+               span.icon.is-medium.is-danger
+                 i.fas.fa-heart
+               | IN EUROPE
 
 div class="modal #{request.path.match(/privacy-policy/) && "is-active"}"
   .modal-background
