@@ -41,20 +41,15 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
 
       respond_with :message, text: render("sticker_loading"), parse_mode: "HTML"
 
-      begin
-        processing_sticker!
-        add_sticker(message["sticker"])
-        BuildCartJob.perform_now(@customer.draft_order)
+      add_sticker(message["sticker"])
+      BuildCartJob.perform_now(@customer.draft_order)
 
-        if @customer.draft_order.images.count > 1
-          @customer.draft_order.cart.open do |cart|
-            respond_with :photo, photo: cart, caption: render("sticker_added"), parse_mode: "HTML"
-          end
-        else
-          respond_with :message, text: render("sticker_added"), parse_mode: "HTML"
+      if @customer.draft_order.images.count > 1
+        @customer.draft_order.cart.open do |cart|
+          respond_with :photo, photo: cart, caption: render("sticker_added"), parse_mode: "HTML"
         end
-      ensure
-        processed_sticker!
+      else
+        respond_with :message, text: render("sticker_added"), parse_mode: "HTML"
       end
 
     elsif message["successful_payment"].present?
@@ -157,11 +152,9 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
     elsif data.match(/^DELETE_IMAGE_/)
       id, index = data.match(/^DELETE_IMAGE_([0-9]+)_([0-9]+)$/)[1..2]
 
-      if processing_sticker?
-        return respond_with :message, text: render("saving_sticker_error"), parse_mode: "HTML"
-      end
-
       respond_with :message, text: render("deleting_sticker", index: index.to_i), parse_mode: "HTML"
+
+       @customer.draft_order.images.find(id).destroy
 
       if @customer.draft_order.images.any?
         BuildCartJob.perform_now(@customer.draft_order)
@@ -352,6 +345,7 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
   end
 
   def add_sticker(sticker_message)
+    processing_sticker!
     sticker_file_path = self.bot.get_file(file_id: sticker_message["file_id"])["result"]["file_path"]
     sticker = open("https://api.telegram.org/file/bot#{self.bot.token}/#{sticker_file_path}")
 
@@ -372,6 +366,8 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
         cached.write(sticker.read)
       end
     end
+  ensure
+    processed_sticker!
   end
 
   def redis_connection
