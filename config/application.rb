@@ -24,5 +24,6 @@ module Printogram
     # the framework and any gems in your application.
 
     config.site_name = ENV["SITE_NAME"] ||  Rails.application.class.module_parent_name
+    config.max_image_count_per_order = (ENV["MAX_IMAGE_COUNT_PER_ORDER"] || 25).to_i
   end
 end
