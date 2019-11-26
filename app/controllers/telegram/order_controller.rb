@@ -58,7 +58,7 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
       end
 
     elsif message["successful_payment"].present?
-      @customer.draft_order.update({
+      @customer.submitted_order.update({
         telegram_payment_charge_reference: message["successful_payment"]["telegram_payment_charge_id"],
         provider_payment_charge_reference: message["successful_payment"]["provider_payment_charge_id"],
         state: "closed",
@@ -329,7 +329,7 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
       customer_name: data["order_info"]["name"],
       final_price: data["total_amount"],
       currency: data["currency"],
-      state: "validated"
+      state: "submitted"
     })
 
     answer_pre_checkout_query(true, {})

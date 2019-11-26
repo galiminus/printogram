@@ -9,15 +9,7 @@ class Order < ApplicationRecord
   has_one_attached :cart
 
   after_save :create_pwinty_order!, if: -> {
-    previous_changes["state"] == ["draft", "validated"]
-  }
-
-  after_save :submit_pwinty_order!, if: -> {
-    previous_changes["state"] == ["validated", "submitted"]
-  }
-
-  after_destroy :cancel_pwinty_order!, if: -> {
-    pwinty_reference.present?
+    previous_changes["state"] == ["draft", "submitted"]
   }
 
   def reference
@@ -55,22 +47,14 @@ class Order < ApplicationRecord
     self.update(pwinty_reference: JSON.parse(response.body)["data"]["id"])
 
     images.each do |image|
-      Pwinty.create_images(self, {
+      Pwinty.create_image(self, {
         sku: image.product.sku,
         url: image.pwinty_variant.processed.service_url,
         copies: 1,
         sizing: "Crop",
       })
     end
-  end
 
-  def cancel_pwinty_order!
-    Pwinty.update_order_status(self, { status: "Cancelled" })
-  rescue => error
-    ExceptionNotifier.notify_exception(error)
-  end
-
-  def submit_pwinty_order!
     Pwinty.update_order_status(self, { status: "Submitted" })
   end
 

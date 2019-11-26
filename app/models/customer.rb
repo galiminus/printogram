@@ -7,6 +7,10 @@ class Customer < ApplicationRecord
     end
   end
 
+  def submitted_order
+    self.orders.order(created_at: :desc).find_by(state: "submitted")
+  end
+
   def self.create_from_telegram!(from)
     self.find_or_create_by!(telegram_id: from["id"]) do |user|
       user.name = from["first_name"]

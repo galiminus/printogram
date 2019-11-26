@@ -13,7 +13,8 @@ Product.destroy_all
     name: "Small vinyl kisscut sticker",
     dimensions: "3x4” / 7.5x10cm",
     sku: "M-STI-3X4",
-    price: 1.2
+    price: 1.2,
+    scale: 0.75
   }
 ].each.with_index do |attributes, order|
   Product.create(attributes.merge(order: order))
