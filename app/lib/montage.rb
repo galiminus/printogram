@@ -8,7 +8,7 @@ class Montage
 
       dimension = [256 / Math.sqrt(order.images.count).floor * 2, 192].max
       pointsize = dimension / 8
-      system("montage -font #{Rails.root}/app/assets/fonts/CarterOne-Regular.ttf -pointsize #{pointsize} -geometry #{dimension}x#{dimension}\\>+12+24 -bordercolor white -border 10 #{image_params} #{output}")
+      system("montage -quality 70 -font #{Rails.root}/app/assets/fonts/CarterOne-Regular.ttf -pointsize #{pointsize} -geometry #{dimension}x#{dimension}\\>+6+12 -bordercolor white -border 10 #{image_params} #{output}")
 
       yield output
     end

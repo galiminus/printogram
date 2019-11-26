@@ -366,7 +366,7 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
         filename: "sticker-#{ sticker_message["file_id"]}.webp"
       }
     )
-    image.preload_pwinty_variant!
+    PreloadPwintyImageJob.perform_later(image)
 
     # fill up the cache
     image.save_to_cache do |local_path|
