@@ -1,4 +1,29 @@
-header#header-hero-container
+header#header-hero-container.is-hidden-mobile
+  #overlay-hero.hero.is-info.is-small.is-bold
+  #content-hero.hero.is-small.is-info
+    .hero-body
+      .container
+        .level
+          .level-left
+            .level-item
+              .content
+                h1.title.brand
+                  = Rails.configuration.site_name.upcase
+                #service-description
+                  | Turn <b>Telegram</b> stickers into real stickers
+
+          .level-right
+            .level-item
+              .content.has-text-white.has-text-centered
+                = link_to "https://t.me/#{Rails.application.credentials.telegram[:order_bot_name]}?start=start", class: 'button is-outlined is-inverted is-info' do
+                  | Get started on Telegram
+            .level-item
+                .price-tag
+                  = "#{Money.new(Product.first.price, "USD").format(symbol: '$')} per sticker"
+  video autoplay="true" muted="true" preload="true" loop="true"
+    source src="http://techslides.com/demos/sample-videos/small.mp4" type="video/mp4"
+
+header#header-hero-mobile-container.is-hidden-tablet
   .hero.is-info.is-small.is-bold
     .hero-body
       .container
@@ -16,12 +41,10 @@ header#header-hero-container
               .content.has-text-white.has-text-centered
                 = link_to "https://t.me/#{Rails.application.credentials.telegram[:order_bot_name]}?start=start", class: 'button is-outlined is-inverted is-info' do
                   | Get started on Telegram
-            .level-item.is-hidden-mobile
-                .price-tag
-                  = "#{Money.new(Product.first.price, "USD").format(symbol: '$')} per sticker"
+
 
 section#help-hero-container
-  .hero.is-light.is-medium.is-bold
+  .hero.is-light.is-medium
     .hero-body
       .container
         nav.level

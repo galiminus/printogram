@@ -15,6 +15,7 @@
 @import url('https://fonts.googleapis.com/css?family=Carter+One|Roboto+Condensed&display=block');
 
 $info: #239bd8;
+$header-height: 78vh;
 // $family-sans-serif: 'Montserrat', sans-serif;
 $family-sans-serif: 'Roboto Condensed', sans-serif;
 
@@ -35,6 +36,32 @@ html, body {
 }
 
 #header-hero-container {
+  max-height: $header-height;
+  overflow: hidden;
+  video {
+    width: 100%;
+    height: $header-height;
+    object-fit: cover;
+    z-index: 1;
+  }
+  .hero {
+    width: 100%;
+    position: absolute;
+    z-index: 2;
+  }
+  #overlay-hero {
+    height: $header-height;
+    opacity: 0.8;
+  }
+  #content-hero {
+    background: transparent;
+  }
+  .brand {
+    font-size: 3em;
+  }
+}
+
+#header-hero-mobile-container {
   position: fixed;
   top: 0;
   width: 100%;
@@ -55,6 +82,10 @@ html, body {
   margin-top: 0px;
   .hero {
     background: transparent;
+    .hero-body {
+      padding-top: 4vh;
+      padding-bottom: 4vh;
+    }
   }
   .level-item {
     flex: 1;
@@ -170,7 +201,7 @@ html, body {
 }
 
 @include mobile {
-  #header-hero-container {
+  #header-hero-mobile-container {
     text-align: center;
     .brand {
       font-size: 2em;
