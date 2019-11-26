@@ -20,8 +20,8 @@ header#header-hero-container.is-hidden-mobile
             .level-item
                 .price-tag
                   = "#{Money.new(Product.first.price, "USD").format(symbol: '$')} per sticker"
-  video autoplay="true" muted="true" preload="true" loop="true"
-    source src="http://techslides.com/demos/sample-videos/small.mp4" type="video/mp4"
+  video autoplay="true" muted="true" preload="true"
+    source src=image_path("home.mp4") type="video/mp4"
 
 header#header-hero-mobile-container.is-hidden-tablet
   .hero.is-info.is-small.is-bold
