@@ -3,7 +3,7 @@ class Order < ApplicationRecord
 
   belongs_to :customer
   belongs_to :coupon, optional: true
-  has_many :images
+  has_many :images, dependent: :destroy
   accepts_nested_attributes_for :images, allow_destroy: true
 
   has_one_attached :cart
