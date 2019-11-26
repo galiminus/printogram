@@ -384,13 +384,13 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
   end
 
   def push_processed_message!
-    if chat['id'].present? && payload["message_id"].present?
+    if chat.present? && payload.present? && chat['id'].present? && payload["message_id"].present?
       redis_connection.set("#{chat['id']}:#{payload["message_id"]}", "processed")
     end
   end
 
   def already_processed_message?
-    if chat['id'].present? && payload["message_id"].present?
+    if chat.present? && payload.present? && chat['id'].present? && payload["message_id"].present?
       redis_connection.get("#{chat['id']}:#{payload["message_id"]}") == "processed"
     else
       false
