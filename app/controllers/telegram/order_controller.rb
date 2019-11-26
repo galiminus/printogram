@@ -40,7 +40,7 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
         return respond_with :message, text: render("animated_sticker_error"), parse_mode: "HTML"
       end
 
-      if @customer.draft_order.images.count == Rails.configuration.max_image_count_per_order
+      if @customer.draft_order.images.count >= Rails.configuration.max_image_count_per_order
         return respond_with :message, text: render("max_image_count_per_order_reached"), parse_mode: "HTML"
       end
 
