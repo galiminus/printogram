@@ -63,36 +63,38 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
       return respond_with :message, text: render("successful_payment"), parse_mode: "HTML"
 
     elsif message["text"].present? && message["text"].match(/^https:\/\/t.me\/addstickers\/.+$/)
-      set_name = message["text"].match(/^https:\/\/t.me\/addstickers\/(.+)$/)[1]
-      response = self.bot.get_sticker_set(name: set_name)
+      self.bot.async(false) do
+        set_name = message["text"].match(/^https:\/\/t.me\/addstickers\/(.+)$/)[1]
+        response = self.bot.get_sticker_set(name: set_name)
 
-      allowed_stickers = response["result"]["stickers"].select do |sticker_message|
-        !sticker_message["is_animated"]
-      end
-
-      if allowed_stickers.empty?
-        return respond_with :message, text: render("animated_sticker_error"), parse_mode: "HTML"
-      end
-
-      message = nil
-      message_time = nil
-      allowed_stickers.each.with_index do |sticker_message, index|
-        add_sticker(sticker_message)
-        if message_time.blank? || message_time < 1.seconds.before || index == allowed_stickers.count - 1
-          if message.present?
-            bot.delete_message chat_id: message["result"]["chat"]["id"], message_id: message["result"]["message_id"]
-          end
-
-          message = respond_with :message, text: render("sticker_set_progress", index: index + 1, total: allowed_stickers.count), parse_mode: "HTML"
-          message_time = Time.now
+        allowed_stickers = response["result"]["stickers"].select do |sticker_message|
+          !sticker_message["is_animated"]
         end
-      end
-      respond_with :message, text: render("sticker_set_loading"), parse_mode: "HTML"
 
-      BuildCartJob.perform_now(@customer.draft_order)
+        if allowed_stickers.empty?
+          return respond_with :message, text: render("animated_sticker_error"), parse_mode: "HTML"
+        end
 
-      @customer.draft_order.cart.open do |cart|
-        respond_with :photo, photo: cart, caption: render("sticker_added"), parse_mode: "HTML"
+        message = nil
+        message_time = nil
+        allowed_stickers.each.with_index do |sticker_message, index|
+          add_sticker(sticker_message)
+          if message_time.blank? || message_time < 1.seconds.before || index == allowed_stickers.count - 1
+            if message.present?
+              bot.delete_message chat_id: message["result"]["chat"]["id"], message_id: message["result"]["message_id"]
+            end
+
+            message = respond_with :message, text: render("sticker_set_progress", index: index + 1, total: allowed_stickers.count), parse_mode: "HTML"
+            message_time = Time.now
+          end
+        end
+        respond_with :message, text: render("sticker_set_loading"), parse_mode: "HTML"
+
+        BuildCartJob.perform_now(@customer.draft_order)
+
+        @customer.draft_order.cart.open do |cart|
+          respond_with :photo, photo: cart, caption: render("sticker_added"), parse_mode: "HTML"
+        end
       end
 
     elsif message["text"].present? && country = (ISO3166::Country.find_country_by_name(message["text"]) || ISO3166::Country[message["text"]])
@@ -346,24 +348,27 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
 
   def add_sticker(sticker_message)
     processing_sticker!
-    sticker_file_path = self.bot.get_file(file_id: sticker_message["file_id"])["result"]["file_path"]
-    sticker = open("https://api.telegram.org/file/bot#{self.bot.token}/#{sticker_file_path}")
 
-    image = Image.create!(
-      order: @customer.draft_order,
-      product: @product,
-      document: {
-        io: sticker,
-        filename: "sticker-#{ sticker_message["file_id"]}.webp"
-      }
-    )
-    image.preload_pwinty_variant!
+    self.bot.async(false) do
+      sticker_file_path = self.bot.get_file(file_id: sticker_message["file_id"])["result"]["file_path"]
+      sticker = open("https://api.telegram.org/file/bot#{self.bot.token}/#{sticker_file_path}")
 
-    # fill up the cache
-    image.save_to_cache do |local_path|
-      File.open(local_path, 'wb') do |cached|
-        sticker.rewind
-        cached.write(sticker.read)
+      image = Image.create!(
+        order: @customer.draft_order,
+        product: @product,
+        document: {
+          io: sticker,
+          filename: "sticker-#{ sticker_message["file_id"]}.webp"
+        }
+      )
+      image.preload_pwinty_variant!
+
+      # fill up the cache
+      image.save_to_cache do |local_path|
+        File.open(local_path, 'wb') do |cached|
+          sticker.rewind
+          cached.write(sticker.read)
+        end
       end
     end
   ensure
