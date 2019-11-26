@@ -3,7 +3,8 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
 
   before_action :set_customer
   before_action :set_product
-  before_action :check_processing
+  before_action :check_processing_sticker
+  before_action :check_message_already_processed
 
   CONTINUE_ORDER = "Continue order"
   START_NEW_ORDER = "Start a new order"
@@ -374,7 +375,29 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
     @redis_connection ||= Redis.new
   end
 
-  def check_processing
+  def push_processed_message!
+    if chat['id'].present? && payload["message_id"].present?
+      redis_connection.set("#{chat['id']}:#{payload["message_id"]}", "processed")
+    end
+  end
+
+  def already_processed_message?
+    if chat['id'].present? && payload["message_id"].present?
+      redis_connection.get("#{chat['id']}:#{payload["message_id"]}") == "processed"
+    else
+      false
+    end
+  end
+
+  def check_message_already_processed
+    if already_processed_message?
+      throw :abort
+    else
+      push_processed_message!
+    end
+  end
+
+  def check_processing_sticker
     if processing_sticker?
       respond_with :message, text: render("saving_sticker_error"), parse_mode: "HTML"
 
