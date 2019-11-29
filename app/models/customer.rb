@@ -2,9 +2,7 @@ class Customer < ApplicationRecord
   has_many :orders
 
   def draft_order
-    self.orders.find_or_create_by(state: 'draft') do |order|
-      order.customer_name = self.name
-    end
+    self.orders.find_or_create_by(state: 'draft')
   end
 
   def submitted_order
