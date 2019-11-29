@@ -26,7 +26,13 @@ class Image < ApplicationRecord
   def pwinty_variant
     ActiveStorage.variable_content_types = (ActiveStorage.variable_content_types + ["image/webp"]).uniq # pretty dirty, but well...
 
-    document.variant(resize_and_pad: [512, (512 * (1 / product.scale)).floor], convert: :png)
+    document.variant({
+      trim: true,
+      resize_and_pad: [512, (512 * (1 / product.scale)).floor, { gravity: 'center' }],
+      background: 'none',
+      extent: 532,
+      convert: :png
+    })
   end
 
   def preload_pwinty_variant!
