@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_11_25_161225) do
+ActiveRecord::Schema.define(version: 2019_11_29_194642) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -102,7 +102,7 @@ ActiveRecord::Schema.define(version: 2019_11_25_161225) do
   end
 
   create_table "orders", force: :cascade do |t|
-    t.string "country_code", default: "FR"
+    t.string "country_code"
     t.string "recipient_name"
     t.string "state", default: "draft"
     t.bigint "customer_id"
