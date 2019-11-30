@@ -8,10 +8,6 @@ class Order < ApplicationRecord
 
   has_one_attached :cart
 
-  after_save :create_pwinty_order!, if: -> {
-    previous_changes["state"] == ["draft", "submitted"]
-  }
-
   def reference
     "#{customer.telegram_id}-#{id}"
   end
@@ -30,32 +26,6 @@ class Order < ApplicationRecord
     end.sum do |product, count|
       product.price * count
     end
-  end
-
-  def create_pwinty_order!
-    response = Pwinty.create_order({
-      merchantOrderId: self.id,
-      recipientName: self.customer_name,
-      countryCode: self.country_code,
-      preferredShippingMethod: self.preferred_shipping_method,
-      address1: self.address1,
-      address2: self.address2,
-      addressTownOrCity: self.address_town_or_city,
-      stateOrCounty: self.state_or_county,
-      postalOrZipCode: self.postal_or_zip_code
-    })
-    self.update(pwinty_reference: JSON.parse(response.body)["data"]["id"])
-
-    images.each do |image|
-      Pwinty.create_image(self, {
-        sku: image.product.sku,
-        url: image.pwinty_variant.processed.service_url,
-        copies: 1,
-        sizing: "Crop",
-      })
-    end
-
-    Pwinty.update_order_status(self, { status: "Submitted" })
   end
 
   def shipping_options

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_11_29_194642) do
+ActiveRecord::Schema.define(version: 2019_11_30_131206) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -78,6 +78,7 @@ ActiveRecord::Schema.define(version: 2019_11_29_194642) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.string "country_code"
+    t.integer "chat_reference"
   end
 
   create_table "images", force: :cascade do |t|
@@ -103,7 +104,6 @@ ActiveRecord::Schema.define(version: 2019_11_29_194642) do
 
   create_table "orders", force: :cascade do |t|
     t.string "country_code"
-    t.string "recipient_name"
     t.string "state", default: "draft"
     t.bigint "customer_id"
     t.datetime "created_at", precision: 6, null: false

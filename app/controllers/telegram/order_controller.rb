@@ -5,6 +5,7 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
   before_action :set_product
   before_action :check_processing_sticker
   before_action :check_message_already_processed
+  before_action :set_customer_chat_reference
 
   CONTINUE_ORDER = "Continue order"
   START_NEW_ORDER = "Start a new order"
@@ -47,7 +48,7 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
       respond_with :message, text: render("sticker_loading"), parse_mode: "HTML"
 
       add_sticker(message["sticker"])
-      BuildCartJob.perform_now(@customer.draft_order)
+      BuildCartWorker.new.perform(@customer.draft_order.id)
 
       if @customer.draft_order.images.count > 1
         @customer.draft_order.cart.open do |cart|
@@ -58,14 +59,13 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
       end
 
     elsif message["successful_payment"].present?
-      @customer.submitted_order.update({
+      @customer.ongoing_order.update({
         telegram_payment_charge_reference: message["successful_payment"]["telegram_payment_charge_id"],
         provider_payment_charge_reference: message["successful_payment"]["provider_payment_charge_id"],
-        state: "closed",
-        closed_at: DateTime.now
       })
-
-      return respond_with :message, text: render("successful_payment"), parse_mode: "HTML"
+      respond_with :message, text: render("successful_payment"), parse_mode: "HTML"
+      CreatePwintyOrderWorker.perform_in(30.seconds, @customer.ongoing_order.id)
+      return
 
     elsif message["text"].present? && message["text"].match(/^https:\/\/t.me\/addstickers\/.+$/)
       set_name = message["text"].match(/^https:\/\/t.me\/addstickers\/(.+)$/)[1]
@@ -98,7 +98,7 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
       end
       respond_with :message, text: render("sticker_set_loading"), parse_mode: "HTML"
 
-      BuildCartJob.perform_now(@customer.draft_order)
+      BuildCartWorker.new.perform(@customer.draft_order.id)
 
       @customer.draft_order.cart.open do |cart|
         respond_with :photo, photo: cart, caption: render("sticker_added"), parse_mode: "HTML"
@@ -166,7 +166,7 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
        @customer.draft_order.images.find(id).destroy
 
       if @customer.draft_order.images.any?
-        BuildCartJob.perform_now(@customer.draft_order)
+        BuildCartWorker.new.perform(@customer.draft_order.id)
         @customer.draft_order.cart.open do |cart|
           respond_with :photo, photo: cart, caption: render("sticker_deleted"), parse_mode: "HTML"
         end
@@ -329,7 +329,7 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
       customer_name: data["order_info"]["name"],
       final_price: data["total_amount"],
       currency: data["currency"],
-      state: "submitted"
+      state: "ongoing"
     })
 
     answer_pre_checkout_query(true, {})
@@ -353,6 +353,12 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
     @customer = Customer.create_from_telegram! from
   end
 
+  def set_customer_chat_reference
+    if chat.present? && chat["id"].present?
+      @customer.update(chat_reference: chat["id"])
+    end
+  end
+
   def add_sticker(sticker_message)
     processing_sticker!
     sticker_file_path = self.bot.get_file(file_id: sticker_message["file_id"])["result"]["file_path"]
@@ -366,7 +372,7 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
         filename: "sticker-#{ sticker_message["file_id"]}.webp"
       }
     )
-    PreloadPwintyImageJob.perform_later(image)
+    PreloadPwintyImageWorker.perform_async(image.id)
 
     # fill up the cache
     image.save_to_cache do |local_path|

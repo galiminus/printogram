@@ -1,7 +1,7 @@
 ActiveAdmin.register Order do
   permit_params [
     :country_code,
-    :recipient_name,
+    :customer_name,
     :state,
     :created_at,
     :updated_at,
@@ -67,7 +67,7 @@ ActiveAdmin.register Order do
     panel "Order info" do
       attributes_table_for order do
         row :country_code
-        row :recipient_name
+        row :customer_name
         row :state
         row :customer_id
         row :created_at
@@ -78,6 +78,12 @@ ActiveAdmin.register Order do
         row :state_or_county
         row :postal_or_zip_code
         row :preferred_shipping_method
+        row :pwinty_reference
+        row :currency
+        row :final_price
+        row :telegram_payment_charge_reference
+        row :provider_payment_charge_reference
+        row :closed_at
       end
     end
   end
@@ -91,7 +97,7 @@ ActiveAdmin.register Order do
 
     f.inputs "Order Details" do
       f.input :country_code
-      f.input :recipient_name
+      f.input :customer_name
       f.input :state
       f.input :created_at
       f.input :updated_at

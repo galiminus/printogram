@@ -5,8 +5,8 @@ class Customer < ApplicationRecord
     self.orders.find_or_create_by(state: 'draft')
   end
 
-  def submitted_order
-    self.orders.order(created_at: :desc).find_by(state: "submitted")
+  def ongoing_order
+    self.orders.order(created_at: :desc).find_by(state: "ongoing")
   end
 
   def self.create_from_telegram!(from)
