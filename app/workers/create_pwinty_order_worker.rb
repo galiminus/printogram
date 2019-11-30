@@ -4,7 +4,7 @@ class CreatePwintyOrderWorker
 
   sidekiq_retries_exhausted do |msg, ex|
     order = Order.find_by(id: msg["args"].first)
-    return if order.blank? || order.state == "closed"
+    return if order.blank? || order.state != "ongoing"
 
     order.update(state: "error")
 
@@ -19,7 +19,7 @@ class CreatePwintyOrderWorker
 
   def perform(order_id)
     order = Order.find_by(id: order_id)
-    return if order.blank? || order.state == "closed"
+    return if order.blank? || order.state != "ongoing"
 
     if order.pwinty_reference.blank?
       response = Pwinty.create_order({
@@ -61,7 +61,7 @@ class CreatePwintyOrderWorker
     )
 
     begin
-      Telegram.bots[:order].send_message(chat_id: order.customer.chat_reference, text: "Your order <b>#{order.reference}</b> was successfully sent to our partner for printing.", parse_mode: "HTML")
+      Telegram.bots[:order].send_message(chat_id: order.customer.chat_reference, text: "Your order <b>#{order.reference}</b> has been successfully sent to our partner for printing.", parse_mode: "HTML")
     rescue => error
       ExceptionNotifier.notify_exception(error)
     end
