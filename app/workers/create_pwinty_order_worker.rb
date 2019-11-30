@@ -53,7 +53,7 @@ class CreatePwintyOrderWorker
     )
 
     begin
-      Telegram.bots[:order].send_message(chat_id: order.customer.chat_reference, text: "Your order <b>#{order.reference}</b> was successfuly sent to our partner for printing.", parse_mode: "HTML")
+      Telegram.bots[:order].send_message(chat_id: order.customer.chat_reference, text: "Your order <b>#{order.reference}</b> was successfully sent to our partner for printing.", parse_mode: "HTML")
     rescue => error
       ExceptionNotifier.notify_exception(error)
     end
