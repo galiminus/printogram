@@ -7,6 +7,9 @@ class CreatePwintyOrderWorker
     return if order.blank? || order.state == "closed"
 
     order.update(state: "error")
+
+    RefundOrderWorker.perform_async(order.id)
+
     begin
       Telegram.bots[:order].send_message(chat_id: order.customer.chat_reference, text: "Your order <b>#{order.reference}</b> couldn't be completed, you will be refunded in 2 to 3 business days. We are sorry for the inconvenience.", parse_mode: "HTML")
     rescue => error
