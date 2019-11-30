@@ -38,6 +38,11 @@ class CreatePwintyOrderWorker
 
     order.images.each do |image|
       if image.pwinty_reference.blank?
+        sticker_file_path = Telegram.bots[:order].get_file(file_id: image.telegram_reference)["result"]["file_path"]
+        sticker = open("https://api.telegram.org/file/bot#{Telegram.bots[:order].token}/#{sticker_file_path}")
+
+        image.document.attach(io: sticker, filename: "sticker-#{image.telegram_reference}.webp")
+
         response = Pwinty.create_image(order, {
           sku: image.product.sku,
           url: image.pwinty_variant.processed.service_url,

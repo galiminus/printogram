@@ -7,7 +7,10 @@ class Image < ApplicationRecord
   def download!
     save_to_cache do |local_path|
       unless File.exists?(local_path)
-        system("curl -s #{document.service_url.shellescape} --output #{local_path}")
+        sticker_file_path = Telegram.bots[:order].get_file(file_id: self.telegram_reference)["result"]["file_path"]
+        sticker_url = "https://api.telegram.org/file/bot#{Telegram.bots[:order].token}/#{sticker_file_path}"
+
+        system("curl -s #{sticker_url.shellescape} --output #{local_path}")
       end
     end
   end
@@ -34,9 +37,5 @@ class Image < ApplicationRecord
       convert: :png,
       repage: "+0+0"
     })
-  end
-
-  def preload_pwinty_variant!
-    pwinty_variant.processed
   end
 end

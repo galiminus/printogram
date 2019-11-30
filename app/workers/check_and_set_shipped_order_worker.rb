@@ -7,7 +7,7 @@ class CheckAndSetShippedOrderWorker
 
     response = JSON.parse(Pwinty.get_order(order))
 
-    if response["data"]["shippingInfo"]["shipments"].first["shippedOn"].present?
+    if response.try(:[], "data").try(:[], "shippingInfo").try(:[], "shipments")&.first.try(:[], "shippedOn").present?
       order.update(state: "shipped")
 
       begin

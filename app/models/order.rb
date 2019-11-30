@@ -6,8 +6,6 @@ class Order < ApplicationRecord
   has_many :images, dependent: :destroy
   accepts_nested_attributes_for :images, allow_destroy: true
 
-  has_one_attached :cart
-
   def reference
     "#{customer.telegram_id}-#{id}"
   end

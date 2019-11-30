@@ -48,11 +48,10 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
       respond_with :message, text: render("sticker_loading"), parse_mode: "HTML"
 
       add_sticker(message["sticker"])
-      BuildCartWorker.new.perform(@customer.draft_order.id)
 
       if @customer.draft_order.images.count > 1
-        @customer.draft_order.cart.open do |cart|
-          respond_with :photo, photo: cart, caption: render("sticker_added"), parse_mode: "HTML"
+        Montage.create_cart(@customer.draft_order) do |path|
+          respond_with :photo, photo: open(path), caption: render("sticker_added"), parse_mode: "HTML"
         end
       else
         respond_with :message, text: render("sticker_added"), parse_mode: "HTML"
@@ -87,21 +86,11 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
       message_time = nil
       allowed_stickers.each.with_index do |sticker_message, index|
         add_sticker(sticker_message)
-        if message_time.blank? || message_time < 1.seconds.before || index == allowed_stickers.count - 1
-          if message.present?
-            bot.delete_message chat_id: message["result"]["chat"]["id"], message_id: message["result"]["message_id"]
-          end
-
-          message = respond_with :message, text: render("sticker_set_progress", index: index + 1, total: allowed_stickers.count), parse_mode: "HTML"
-          message_time = Time.now
-        end
       end
       respond_with :message, text: render("sticker_set_loading"), parse_mode: "HTML"
 
-      BuildCartWorker.new.perform(@customer.draft_order.id)
-
-      @customer.draft_order.cart.open do |cart|
-        respond_with :photo, photo: cart, caption: render("sticker_added"), parse_mode: "HTML"
+      Montage.create_cart(@customer.draft_order) do |path|
+        respond_with :photo, photo: open(path), caption: render("sticker_added"), parse_mode: "HTML"
       end
 
     elsif message["text"].present? && country = (ISO3166::Country.find_country_by_name(message["text"]) || ISO3166::Country[message["text"]])
@@ -166,9 +155,8 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
        @customer.draft_order.images.find(id).destroy
 
       if @customer.draft_order.images.any?
-        BuildCartWorker.new.perform(@customer.draft_order.id)
-        @customer.draft_order.cart.open do |cart|
-          respond_with :photo, photo: cart, caption: render("sticker_deleted"), parse_mode: "HTML"
+        Montage.create_cart(@customer.draft_order) do |path|
+          respond_with :photo, photo: open(path), caption: render("sticker_deleted"), parse_mode: "HTML"
         end
       else
         respond_with :message, text: render("order_cleared"), parse_mode: "HTML"
@@ -182,8 +170,8 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
     else
       respond_with :message, text: render("continue"), parse_mode: "HTML"
 
-      @customer.draft_order.cart.open do |cart|
-        respond_with :photo, photo: cart, caption: render("clear_order_cancelled"), parse_mode: "HTML"
+      Montage.create_cart(@customer.draft_order) do |path|
+        respond_with :photo, photo: open(path), caption: render("clear_order_cancelled"), parse_mode: "HTML"
       end
     end
   end
@@ -361,26 +349,12 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
 
   def add_sticker(sticker_message)
     processing_sticker!
-    sticker_file_path = self.bot.get_file(file_id: sticker_message["file_id"])["result"]["file_path"]
-    sticker = open("https://api.telegram.org/file/bot#{self.bot.token}/#{sticker_file_path}")
 
     image = Image.create!(
       order: @customer.draft_order,
       product: @product,
-      document: {
-        io: sticker,
-        filename: "sticker-#{ sticker_message["file_id"]}.webp"
-      }
+      telegram_reference: sticker_message["file_id"],
     )
-    PreloadPwintyImageWorker.perform_async(image.id)
-
-    # fill up the cache
-    image.save_to_cache do |local_path|
-      File.open(local_path, 'wb') do |cached|
-        sticker.rewind
-        cached.write(sticker.read)
-      end
-    end
   ensure
     processed_sticker!
   end
