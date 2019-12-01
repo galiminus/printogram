@@ -1,4 +1,8 @@
 class Customer < ApplicationRecord
+  encrypts :telegram_id, migrating: true, type: :integer
+  encrypts :name, migrating: true, type: :string
+  encrypts :ùsername, migrating: true, type: :string
+
   has_many :orders
 
   def draft_order
