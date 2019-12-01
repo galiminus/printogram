@@ -6,6 +6,16 @@ class Order < ApplicationRecord
   has_many :images, dependent: :destroy
   accepts_nested_attributes_for :images, allow_destroy: true
 
+
+  encrypts :country_code_ciphertext, type: :string, migrating: true
+  encrypts :address1_ciphertext, type: :string, migrating: true
+  encrypts :address2_ciphertext, type: :string, migrating: true
+  encrypts :address_town_or_city_ciphertext, type: :string, migrating: true
+  encrypts :state_or_county_ciphertext, type: :string, migrating: true
+  encrypts :postal_or_zip_code_ciphertext, type: :string, migrating: true
+  encrypts :customer_name_ciphertext, type: :string, migrating: true
+
+
   def reference
     "#{customer.telegram_reference}-#{id}"
   end

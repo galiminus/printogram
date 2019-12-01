@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_12_01_122131) do
+ActiveRecord::Schema.define(version: 2019_12_01_185441) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -123,6 +123,13 @@ ActiveRecord::Schema.define(version: 2019_12_01_122131) do
     t.string "provider_payment_charge_reference"
     t.datetime "closed_at"
     t.bigint "coupon_id"
+    t.string "country_code_ciphertext"
+    t.string "address1_ciphertext"
+    t.string "address2_ciphertext"
+    t.string "address_town_or_city_ciphertext"
+    t.string "state_or_county_ciphertext"
+    t.string "postal_or_zip_code_ciphertext"
+    t.string "customer_name_ciphertext"
     t.index ["coupon_id"], name: "index_orders_on_coupon_id", unique: true
     t.index ["customer_id"], name: "index_orders_on_customer_id"
     t.index ["state"], name: "index_orders_on_state"
