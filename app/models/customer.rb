@@ -1,7 +1,7 @@
 class Customer < ApplicationRecord
-  encrypts :telegram_id, migrating: true, type: :integer
-  encrypts :name, migrating: true, type: :string
-  encrypts :username, migrating: true, type: :string
+  encrypts :telegram_id, type: :integer
+  encrypts :name, type: :string
+  encrypts :username, type: :string
 
   has_many :orders
 
