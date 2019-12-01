@@ -7,7 +7,7 @@ class Order < ApplicationRecord
   accepts_nested_attributes_for :images, allow_destroy: true
 
   def reference
-    "#{customer.telegram_id}-#{id}"
+    "#{customer.telegram_reference}-#{id}"
   end
 
   def token

@@ -14,7 +14,7 @@ class Customer < ApplicationRecord
   end
 
   def self.create_from_telegram!(from)
-    self.find_or_create_by!(telegram_id: from["id"]) do |user|
+    self.find_or_create_by!(telegram_reference: from["id"]) do |user|
       user.name = from["first_name"]
       user.username = from["username"]
     end

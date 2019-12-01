@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_12_01_103733) do
+ActiveRecord::Schema.define(version: 2019_12_01_122131) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -78,6 +78,7 @@ ActiveRecord::Schema.define(version: 2019_12_01_103733) do
     t.string "telegram_id_ciphertext"
     t.string "name_ciphertext"
     t.string "username_ciphertext"
+    t.string "telegram_reference"
   end
 
   create_table "images", force: :cascade do |t|
