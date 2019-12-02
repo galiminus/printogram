@@ -99,9 +99,13 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
       respond_with :message, text: render("shipping_options", shipping_options: @customer.draft_order.shipping_options, country: country), parse_mode: "HTML"
 
     elsif message["text"].present? && coupon = Coupon.find_by(code: message["text"].strip.upcase)
-      @customer.draft_order.update(coupon: coupon)
+      if coupon.orders.any?
+        respond_with :message, text: render("coupon_already_used"), parse_mode: "HTML"
+      else
+        @customer.draft_order.update(coupon: coupon)
 
-      respond_with :message, text: render("coupon_saved"), parse_mode: "HTML"
+        respond_with :message, text: render("coupon_saved"), parse_mode: "HTML"
+      end
 
     elsif message["text"].present? && message["text"].match(/^[0-9]+$/)
       index = message["text"].to_i

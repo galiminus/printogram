@@ -4,7 +4,7 @@ class Coupon < ApplicationRecord
   CODE_CHARACTER_SET = ('A'..'Z').to_a - ['O', 'I'] + ('1'..'9').to_a
   CODE_LENGTH = 6
 
-  has_one :order
+  has_many :orders
   belongs_to :product
 
   validates :count, presence: true

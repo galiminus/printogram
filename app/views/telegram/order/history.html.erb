@@ -4,8 +4,8 @@ You don't have any previous orders.
 <% else %>
 ---
 
-  <% customer.orders.where(state: "closed").each do |order| %>
-Order <b><%= order.reference %></b>
+  <% customer.orders.where.not(state: "draft").each do |order| %>
+Order <b><%= order.reference %></b> - <%= order.state %>
 <%= order.closed_at&.strftime("%b %d, %Y") %>
 <%= pluralize(order.images.count, 'sticker') %>, <b><%= Money.new(order.final_price, "USD").format(symbol: '$') %></b>
 
