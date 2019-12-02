@@ -7,13 +7,13 @@ class Order < ApplicationRecord
   accepts_nested_attributes_for :images, allow_destroy: true
 
 
-  encrypts :country_code_ciphertext, type: :string, migrating: true
-  encrypts :address1_ciphertext, type: :string, migrating: true
-  encrypts :address2_ciphertext, type: :string, migrating: true
-  encrypts :address_town_or_city_ciphertext, type: :string, migrating: true
-  encrypts :state_or_county_ciphertext, type: :string, migrating: true
-  encrypts :postal_or_zip_code_ciphertext, type: :string, migrating: true
-  encrypts :customer_name_ciphertext, type: :string, migrating: true
+  encrypts :country_code, type: :string, migrating: truei
+  encrypts :address1, type: :string, migrating: true
+  encrypts :address2, type: :string, migrating: true
+  encrypts :address_town_or_city, type: :string, migrating: true
+  encrypts :state_or_county, type: :string, migrating: true
+  encrypts :postal_or_zip_code, type: :string, migrating: true
+  encrypts :customer_name, type: :string, migrating: true
 
 
   def reference
