@@ -3,7 +3,7 @@ class CheckAndSetShippedOrderWorker
 
   def perform(order_id)
     order = Order.find_by(id: order_id)
-    return if order.blank? || order.state != "closed"
+    return if order.blank? || order.state != "in_production"
 
     response = JSON.parse(Pwinty.get_order(order))
 

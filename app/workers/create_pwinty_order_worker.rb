@@ -55,10 +55,7 @@ class CreatePwintyOrderWorker
 
     Pwinty.update_order_status(order, { status: "Submitted" })
 
-    order.update(
-      state: "closed",
-      closed_at: DateTime.now
-    )
+    order.update(state: "in_production")
 
     begin
       Telegram.bots[:order].send_message(chat_id: order.customer.chat_reference, text: "Your order <b>#{order.reference}</b> has been successfully sent to our partner for printing.", parse_mode: "HTML")
