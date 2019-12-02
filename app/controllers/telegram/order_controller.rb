@@ -202,7 +202,7 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
         ]
       }
     else
-      respond_with :message, text: render("new_order_started")
+      respond_with :message, text: render("new_order_started"), parse_mode: "HTML"
     end
   end
 

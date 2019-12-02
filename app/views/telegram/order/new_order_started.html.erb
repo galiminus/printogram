@@ -1,3 +1,11 @@
 Let's get started!
 
-Please send me your first sticker or share a sticker set.
+Please <b>send me your first sticker</b> or share a sticker set.
+
+<b>More</b>
+/shipping - see shipping options
+<% if customer.draft_order.coupon.present? %>
+/coupon - edit your coupon
+<% else %>
+/coupon - add coupon
+<% end %>
