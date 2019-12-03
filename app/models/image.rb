@@ -33,7 +33,7 @@ class Image < ApplicationRecord
       trim: true,
       resize_and_pad: [512, (512 * (1 / product.scale)).floor, { gravity: 'center' }],
       background: 'none',
-      extent: 532,
+      extent: 512 + 30 * 2,
       convert: :png,
       repage: "+0+0"
     })
