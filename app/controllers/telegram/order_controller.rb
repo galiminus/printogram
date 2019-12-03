@@ -3,8 +3,6 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
 
   before_action :set_customer
   before_action :set_product
-  before_action :check_processing_sticker
-  before_action :check_message_already_processed
   before_action :set_customer_chat_reference
 
   CONTINUE_ORDER = "Continue order"
@@ -352,64 +350,10 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
   end
 
   def add_sticker(sticker_message)
-    processing_sticker!
-
-    image = Image.create!(
+    Image.create!(
       order: @customer.draft_order,
       product: @product,
       telegram_reference: sticker_message["file_id"],
     )
-  ensure
-    processed_sticker!
-  end
-
-  def redis_connection
-    @redis_connection ||= Redis.new
-  end
-
-  def push_processed_message!
-    if chat.present? && payload.present? && chat['id'].present? && payload["message_id"].present?
-      redis_connection.set("#{chat['id']}:#{payload["message_id"]}", "processed")
-    end
-  end
-
-  def already_processed_message?
-    if chat.present? && payload.present? && chat['id'].present? && payload["message_id"].present?
-      redis_connection.get("#{chat['id']}:#{payload["message_id"]}") == "processed"
-    else
-      false
-    end
-  end
-
-  def check_message_already_processed
-    if already_processed_message?
-      throw :abort
-    else
-      push_processed_message!
-    end
-  end
-
-  def check_processing_sticker
-    if processing_sticker?
-      respond_with :message, text: render("saving_sticker_error"), parse_mode: "HTML"
-
-      throw :abort
-    end
-  end
-
-  def processing_sticker_key
-    "#{@customer.draft_order.id}_processing_sticker"
-  end
-
-  def processing_sticker!
-    redis_connection.set(processing_sticker_key, DateTime.now.to_i)
-  end
-
-  def processing_sticker?
-    redis_connection.get(processing_sticker_key).to_i > 12.seconds.ago.to_i
-  end
-
-  def processed_sticker!
-    redis_connection.del(processing_sticker_key)
   end
 end
