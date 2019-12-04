@@ -26,16 +26,9 @@ class Image < ApplicationRecord
     local_path
   end
 
-  def pwinty_variant
-    ActiveStorage.variable_content_types = (ActiveStorage.variable_content_types + ["image/webp"]).uniq # pretty dirty, but well...
-
-    document.variant({
-      trim: true,
-      resize_and_pad: [512, (512 * (1 / product.scale)).floor, { gravity: 'center' }],
-      background: 'none',
-      extent: 512 + 30 * 2,
-      convert: :png,
-      repage: "+0+0"
-    })
+  def generate_pwinty_image!
+    Pwinty.format_image(self) do |image_path|
+      self.document.attach(io: open(image_path), filename: "sticker-#{self.telegram_reference}.webp")
+    end
   end
 end

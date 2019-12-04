@@ -52,4 +52,18 @@ module Pwinty
   def self.parse_response(response)
     JSON.parse response.body
   end
+
+  def self.format_image(image)
+    image_path = image.download!
+
+    Dir.mktmpdir do |wdir|
+      output = "#{wdir}/output.png"
+
+      system("convert #{image_path.shellescape} -channel A -black-threshold 0% +channel -bordercolor none -border 3 \\( -clone 0 -alpha off -fill white -colorize 100% \\) \\( -clone 0 -alpha extract -morphology edgeout octagon\
+:3 \\) -compose over -composite  -trim -background none -gravity center -resize 512x682 -extent 572x762 -repage +0+0 #{output.shellescape}")
+      raise if $? != 0
+
+      yield output
+    end
+  end
 end
