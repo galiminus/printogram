@@ -28,7 +28,7 @@ class Image < ApplicationRecord
 
   def generate_pwinty_image!
     Pwinty.format_image(self.download!) do |image_path|
-      self.document.attach(io: open(image_path), filename: "sticker-#{self.telegram_reference}.webp")
+      self.document.attach(io: open(image_path), filename: "sticker-#{self.telegram_reference}#{File.extname(image_path)}")
     end
   end
 end
