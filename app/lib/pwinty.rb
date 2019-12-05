@@ -56,8 +56,9 @@ module Pwinty
   def self.format_image(image_path)
     Dir.mktmpdir do |wdir|
       output = "#{wdir}/output.png"
+      convert_path = Rails.root.join("vendor/imagemagick/bin/convert")
 
-      system("convert #{image_path.shellescape} -channel A -black-threshold 0% +channel -bordercolor none -border 3 \\( -clone 0 -alpha off -fill white -colorize 100% \\) \\( -clone 0 -alpha extract -morphology edgeout octagon\
+      system("#{convert_path.exist? ? convert_path : "convert"} #{image_path.shellescape} -channel A -black-threshold 0% +channel -bordercolor none -border 3 \\( -clone 0 -alpha off -fill white -colorize 100% \\) \\( -clone 0 -alpha extract -morphology edgeout octagon\
 :3 \\) -compose over -composite  -trim -background none -gravity center -resize 512x682 -extent 572x762 -repage +0+0 #{output.shellescape}")
       raise if $? != 0
 
