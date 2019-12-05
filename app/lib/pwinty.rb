@@ -53,9 +53,7 @@ module Pwinty
     JSON.parse response.body
   end
 
-  def self.format_image(image)
-    image_path = image.download!
-
+  def self.format_image(image_path)
     Dir.mktmpdir do |wdir|
       output = "#{wdir}/output.png"
 
