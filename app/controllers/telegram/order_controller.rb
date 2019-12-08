@@ -17,6 +17,9 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
   CONFIRM_REMOVE_COUPON = "Remove"
   CANCEL_REMOVE_COUPON = "Cancel"
 
+  CANCEL_FINAL_PREVIEW = "« Back"
+  CONFIRM_FINAL_PREVIEW = "Looks good!"
+
   DONE_EDIT = "« Back"
 
   rescue_from Exception do |error|
@@ -145,6 +148,20 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
       @customer.draft_order.destroy
       respond_with :message, text: render("order_cleared"), parse_mode: "HTML"
 
+    elsif data == "CHECKOUT"
+      respond_with(:invoice, {
+        title: "Checkout",
+        description: "Please enter your payment and shipping information. The process is fully handled by Telegram and your private payment information will never be shared with us.",
+        provider_token: Rails.application.credentials.stripe[:telegram_token],
+        currency: "USD",
+        start_parameter: "checkout",
+        prices: [{ label: "#{@customer.draft_order.images.count} stickers", amount: @customer.draft_order.price }],
+        need_name: true,
+        need_shipping_address: true,
+        payload: JSON.dump({ order_id: @customer.draft_order.id }),
+        is_flexible: true,
+      })
+
     elsif data.match(/^SET_CART_PAGE_/)
       page = data.match(/^SET_CART_PAGE_([0-9]+)$/)[1]
       edit_cart_keyboard(page.to_i)
@@ -230,19 +247,17 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
     elsif @customer.draft_order.price == 0
       respond_with :message, text: render("missing_paid_items_error"), parse_mode: "HTML"
     else
-      respond_with :message, text: render("terms_and_conditions_reminder"), parse_mode: "HTML"
-      respond_with(:invoice, {
-        title: "Checkout",
-        description: "Please enter your payment and shipping information. The process is fully handled by Telegram and your private payment information will never be shared with us.",
-        provider_token: Rails.application.credentials.stripe[:telegram_token],
-        currency: "USD",
-        start_parameter: "checkout",
-        prices: [{ label: "#{@customer.draft_order.images.count} stickers", amount: @customer.draft_order.price }],
-        need_name: true,
-        need_shipping_address: true,
-        payload: JSON.dump({ order_id: @customer.draft_order.id }),
-        is_flexible: true,
-      })
+      respond_with :message, text: render("final_preview_loading"), parse_mode: "HTML"
+      Montage.create_cart(@customer.draft_order, full_quality: true) do |path|
+        respond_with :photo, photo: open(path), caption: render("final_preview_disclaimer"), parse_mode: "HTML", reply_markup: {
+          inline_keyboard: [
+            [
+              { text: CANCEL_FINAL_PREVIEW, callback_data: "CONTINUE_ORDER" },
+              { text: CONFIRM_FINAL_PREVIEW, callback_data: "CHECKOUT" },
+            ]
+          ]
+        }
+      end
     end
   end
 

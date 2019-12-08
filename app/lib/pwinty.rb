@@ -53,16 +53,33 @@ module Pwinty
     JSON.parse response.body
   end
 
-  def self.format_image(image_path)
+  def self.format_preview(image_path)
     Dir.mktmpdir do |wdir|
       output = "#{wdir}/output.png"
-      convert_path = Rails.root.join("vendor/imagemagick/bin/convert")
 
-      system("#{convert_path.exist? ? "MAGICK_CONFIGURE_PATH=#{Rails.root}/vendor/imagemagick/etc/ImageMagick-7/ #{convert_path}" : "convert"} #{image_path.shellescape} -channel A -black-threshold 0% +channel -bordercolor none -border 6 \\( -clone 0 -alpha off -fill white -colorize 100% \\) \\( -clone 0 -alpha extract -morphology edgeout octagon\
-:6 \\) -compose over -composite  -trim -background none -gravity center -resize 512x682 -extent 572x762 -repage +0+0 #{output.shellescape}")
-      raise if $? != 0
+      self.convert("#{image_path.shellescape} -background none -gravity center -resize 512x682 -extent 572x762 -repage +0+0 -channel A -black-threshold 0% +channel -bordercolor none -border 6 \\( -clone 0 -alpha off -fill white -colorize 100% \\) \\( -clone 0 -alpha extract -morphology edgeout octagon\
+:6 \\) -compose over -composite \\( -clone 0 -alpha off -fill black -colorize 100% \\) \\( -clone 0 -alpha extract -morphology edgeout octagon\
+:1 \\) -compose over -composite -trim #{output.shellescape}")
 
       yield output
     end
+  end
+
+  def self.format_image(image_path)
+    Dir.mktmpdir do |wdir|
+      output = "#{wdir}/output.png"
+
+      self.convert("#{image_path.shellescape} -channel A -black-threshold 0% +channel -bordercolor none -border 6 \\( -clone 0 -alpha off -fill white -colorize 100% \\) \\( -clone 0 -alpha extract -morphology edgeout octagon\
+:6 \\) -compose over -composite -trim -background none -gravity center -resize 512x682 -extent 572x762 -repage +0+0  #{output.shellescape}")
+
+      yield output
+    end
+  end
+
+  def self.convert(command)
+    convert_path = Rails.root.join("vendor/imagemagick/bin/convert")
+
+    system("#{convert_path.exist? ? "MAGICK_CONFIGURE_PATH=#{Rails.root}/vendor/imagemagick/etc/ImageMagick-7/ #{convert_path}" : "convert"} #{command}")
+    raise if $? != 0
   end
 end

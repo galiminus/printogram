@@ -1,0 +1,3 @@
+<b><%= pluralize(customer.draft_order.images.count, 'sticker') %> - <%= Money.new(customer.draft_order.price, "USD").format(symbol: '$') %></b><%= customer.draft_order.coupon.present? ? " (#{customer.draft_order.coupon.as_words})" : "" %>
+
+Please wait while I create a high quality preview of your stickers.
