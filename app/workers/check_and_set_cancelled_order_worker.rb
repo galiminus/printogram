@@ -1,4 +1,4 @@
-class CheckAndSetShippedOrderWorker
+class CheckAndSetCancelledOrderWorker
   include Sidekiq::Worker
 
   def perform(order_id)
