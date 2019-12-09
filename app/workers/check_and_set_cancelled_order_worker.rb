@@ -7,12 +7,14 @@ class CheckAndSetShippedOrderWorker
 
     response = JSON.parse(Pwinty.get_order(order))
 
-    if response.try(:[], "data").try(:[], "shippingInfo").try(:[], "shipments")&.first.try(:[], "shippedOn").present?
-      order.update(state: "shipped")
+    if response.try(:[], "data").try(:[], "status") == "Cancelled"
+      order.update(state: "cancelled")
+
+      RefundOrderWorker.perform_async(order.id)
 
       begin
         if order.customer.chat_reference.present?
-          Telegram.bots[:order].send_message(chat_id: order.customer.chat_reference, text: "Your order <b>#{order.reference}</b> has been successfully shipped.", parse_mode: "HTML")
+          Telegram.bots[:order].send_message(chat_id: order.customer.chat_reference, text: "Your order <b>#{order.reference}</b> has been cancelled, you will be refunded in 2 to 3 business days.", parse_mode: "HTML")
         end
       rescue => error
         ExceptionNotifier.notify_exception(error)
