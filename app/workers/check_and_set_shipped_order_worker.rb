@@ -11,7 +11,7 @@ class CheckAndSetShippedOrderWorker
       order.update(state: "shipped")
 
       begin
-        if order.chat_reference.present?
+        if order.customer.chat_reference.present?
           Telegram.bots[:order].send_message(chat_id: order.customer.chat_reference, text: "Your order <b>#{order.reference}</b> has been successfully shipped.", parse_mode: "HTML")
         end
       rescue => error
