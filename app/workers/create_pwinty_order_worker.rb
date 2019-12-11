@@ -21,6 +21,10 @@ class CreatePwintyOrderWorker
     order = Order.find_by(id: order_id)
     return if order.blank? || order.state != "ongoing"
 
+    Montage.create_cart(order, full_quality: true) do |path|
+      order.preview.attach(io: open(path), filename: "preview-#{order.reference}#{File.extname(path)}")
+    end
+
     if order.pwinty_reference.blank?
       response = Pwinty.create_order({
         merchantOrderId: order.id,

@@ -1,10 +1,10 @@
-<% if customer.orders.where.not(state: "draft").empty? %>
+<% if orders.empty? %>
 You don't have any previous orders.
 
 <% else %>
 ---
 
-  <% customer.orders.where.not(state: "draft").each do |order| %>
+  <% orders.each do |order| %>
 Order <b><%= order.reference %></b> - <%= order.state.humanize %>
 <%= order.created_at&.strftime("%b %d, %Y") %>
 <%= pluralize(order.images.count, 'sticker') %>, <b><%= Money.new(order.final_price, "USD").format(symbol: '$') %></b>
@@ -12,5 +12,7 @@ Order <b><%= order.reference %></b> - <%= order.state.humanize %>
 ---
 
   <% end %>
+Use /order with your order reference to get more details about an order. For example "/order <%= orders.last.reference %>".
+
 <% end %>
 <%= render partial: "telegram/order/main_menu", locals: { customer: customer } %>

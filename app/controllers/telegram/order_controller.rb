@@ -130,7 +130,7 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
     end
   end
 
-  def callback_query(data = nil)
+  def callback_query(data = nil, *)
     bot.delete_message chat_id: chat["id"], message_id: payload["message"]["message_id"]
 
     if data == "CONTINUE_ORDER" || data == "CANCEL_CLEAR_ORDER" || data == "DONE_EDIT" || data == "KEEP_COUPON"
@@ -183,7 +183,7 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
     end
   end
 
-  def continue!(data = nil)
+  def continue!(data = nil, *)
     if @customer.draft_order.images.empty?
       respond_with :message, text: render("empty_order_error"), parse_mode: "HTML"
     else
@@ -195,7 +195,7 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
     end
   end
 
-  def clear!(data = nil)
+  def clear!(data = nil, *)
     respond_with :message, text: render("clear_order_confirmation"), reply_markup: {
       inline_keyboard: [
         [
@@ -206,7 +206,7 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
     }
   end
 
-  def new!(data = nil)
+  def new!(data = nil, *)
     if @customer.draft_order.images.count > 0
       respond_with :message, text: render("new_order_confirmation"), reply_markup: {
         inline_keyboard: [
@@ -221,7 +221,7 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
     end
   end
 
-  def edit!(data = nil)
+  def edit!(data = nil, *)
     edit_cart_keyboard(1)
   end
 
@@ -229,16 +229,29 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
     respond_with :message, text: render("welcome"), parse_mode: "HTML"
   end
 
-  def terms!(data = nil)
+  def terms!(data = nil, *)
     respond_with :message, text: render("terms_and_conditions"), parse_mode: "HTML"
   end
 
-  def history!(data = nil)
-    respond_with :message, text: render("history"), parse_mode: "HTML"
+  def history!(data = nil, *)
+    respond_with :message, text: render("history", orders: @customer.orders.where.not(state: "draft").order(:created_at)), parse_mode: "HTML"
   end
 
-  def shipping!(data = nil)
+  def shipping!(data = nil, *)
     respond_with :message, text: render("shipping"), parse_mode: "HTML"
+  end
+
+  def order!(data = nil, *)
+    order = @customer.orders.find_each.find { |o| o.reference == data }
+    if order.blank?
+      respond_with :message, text: render("no_order", { reference: data }), parse_mode: "HTML"
+    else
+      if order.preview.attached?
+        respond_with :photo, photo: open(order.preview.service_url), caption: render("order", { order: order }), parse_mode: "HTML"
+      else
+        respond_with :message, text: render("order", { order: order }), parse_mode: "HTML"
+      end
+    end
   end
 
   def checkout!(data = nil, *)
@@ -261,7 +274,7 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
     end
   end
 
-  def coupon!(data = nil)
+  def coupon!(data = nil, *)
     if @customer.draft_order.coupon.present?
       respond_with :message, text: render("remove_coupon"), parse_mode: "HTML", reply_markup: {
         inline_keyboard: [
@@ -276,7 +289,7 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
     end
   end
 
-  def error!(data = nil)
+  def error!(data = nil, *)
     raise RuntimeError
   end
 

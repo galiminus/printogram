@@ -6,7 +6,6 @@ class Order < ApplicationRecord
   has_many :images, dependent: :destroy
   accepts_nested_attributes_for :images, allow_destroy: true
 
-
   encrypts :country_code, type: :string
   encrypts :address1, type: :string
   encrypts :address2, type: :string
@@ -15,6 +14,7 @@ class Order < ApplicationRecord
   encrypts :postal_or_zip_code, type: :string
   encrypts :customer_name, type: :string
 
+  has_one_attached :preview
 
   def reference
     "#{customer.telegram_reference}-#{id}"

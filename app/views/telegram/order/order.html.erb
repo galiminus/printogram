@@ -1,0 +1,22 @@
+Order <b><%= order.reference %></b> - <%= order.state.humanize %>
+<%= order.created_at&.strftime("%b %d, %Y") %>
+<%= pluralize(order.images.count, 'sticker') %>, <b><%= Money.new(order.final_price, "USD").format(symbol: '$') %></b>
+
+<b>Name:</b>
+<%= order.customer_name %>
+
+<b>Address:</b>
+<%= order.address1 %>
+<% if order.address2.present? %>
+<%= order.address2 %>
+<% end %>
+<b>Town or city:</b>
+<%= order.address_town_or_city %>
+<b>State or county:</b>
+<%= order.state_or_county %>
+<b>Postal or ZIP code:</b>
+<%= order.postal_or_zip_code %>
+<b>Country:</b>
+<%= order.country_code %>
+
+<%= render partial: "telegram/order/main_menu", locals: { customer: customer } %>
