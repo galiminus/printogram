@@ -43,4 +43,14 @@ class Image < ApplicationRecord
       self.document.attach(io: open(image_path), filename: "sticker-#{self.telegram_reference}#{File.extname(image_path)}")
     end
   end
+
+  def as_json(options = {})
+    {
+      created_at: self.created_at,
+    }.tap do |base|
+      if document.attached?
+        base[:document] = self.document.service_url
+      end
+    end
+  end
 end

@@ -47,4 +47,24 @@ class Order < ApplicationRecord
       }
     ]
   end
+
+  def as_json(options = {})
+    {
+      created_at: self.created_at,
+      state: self.state,
+      reference: self.reference,
+      images: self.images.as_json,
+      country_code: self.country_code,
+      address1: self.address1,
+      address2: self.address2,
+      address_town_or_city: self.address_town_or_city,
+      state_or_county: self.state_or_county,
+      postal_or_zip_code: self.postal_or_zip_code,
+      customer_name: self.customer_name
+    }.tap do |base|
+      if preview.attached?
+        base[:preview] = self.preview.service_url
+      end
+    end
+  end
 end
