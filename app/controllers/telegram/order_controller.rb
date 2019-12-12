@@ -131,7 +131,11 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
   end
 
   def callback_query(data = nil, *)
-    bot.delete_message chat_id: chat["id"], message_id: payload["message"]["message_id"]
+    begin
+      bot.delete_message chat_id: chat["id"], message_id: payload["message"]["message_id"]
+    rescue => error
+      ExceptionNotifier.notify_exception(error)
+    end
 
     if data == "CONTINUE_ORDER" || data == "CANCEL_CLEAR_ORDER" || data == "DONE_EDIT" || data == "KEEP_COUPON"
       respond_with :message, text: render("clear_order_cancelled"), parse_mode: "HTML"
