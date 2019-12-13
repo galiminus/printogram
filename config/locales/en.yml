@@ -30,13 +30,3 @@
 # available at https://guides.rubyonrails.org/i18n.html.
 
 en:
-  new_order:
-    message: |
-      Let's get started! First I need to know in which country you live, pricing may differ slightly depending on your location.
-
-      In which country do you live? If you're too lazy to write you can share your location.
-  new_sticker:
-    saved: |
-      Got it!
-
-      You now have %{image_count} stickers in your order.
