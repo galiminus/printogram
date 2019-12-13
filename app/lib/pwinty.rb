@@ -65,12 +65,12 @@ module Pwinty
     end
   end
 
-  def self.format_image(image_path)
+  def self.format_image(image_path, scaling: 1)
     Dir.mktmpdir do |wdir|
       output = "#{wdir}/output.png"
 
-      self.convert("#{image_path.shellescape} -channel A -black-threshold 0% +channel -bordercolor none -border 6 \\( -clone 0 -alpha off -fill white -colorize 100% \\) \\( -clone 0 -alpha extract -morphology edgeout octagon\
-:6 \\) -compose over -composite -trim -background none -gravity center -resize 512x682 -extent 572x762 -repage +0+0  #{output.shellescape}")
+      self.convert("#{image_path.shellescape} -channel A -black-threshold 0% +channel -bordercolor none -border #{6 * scaling} \\( -clone 0 -alpha off -fill white -colorize 100% \\) \\( -clone 0 -alpha extract -morphology edgeout octagon\
+:#{6 * scaling} \\) -compose over -composite -trim -background none -gravity center -resize #{512 * scaling}x#{682 * scaling} -extent #{572 * scaling}x#{762 * scaling} -repage +0+0  #{output.shellescape}")
 
       yield output
     end

@@ -7,12 +7,14 @@ class Image < ApplicationRecord
   def download!
     save_to_cache do |local_path|
       unless File.exists?(local_path)
-        sticker_file_path = Telegram.bots[:order].get_file(file_id: self.telegram_reference)["result"]["file_path"]
-        sticker_url = "https://api.telegram.org/file/bot#{Telegram.bots[:order].token}/#{sticker_file_path}"
-
-        system("curl -s #{sticker_url.shellescape} --output #{local_path}")
+        system("curl -s #{telegram_url.shellescape} --output #{local_path}")
       end
     end
+  end
+
+  def telegram_url
+    sticker_file_path = Telegram.bots[:order].get_file(file_id: self.telegram_reference)["result"]["file_path"]
+    "https://api.telegram.org/file/bot#{Telegram.bots[:order].token}/#{sticker_file_path}"
   end
 
   def preview!
@@ -39,8 +41,11 @@ class Image < ApplicationRecord
   end
 
   def generate_pwinty_image!
-    Pwinty.format_image(self.download!) do |image_path|
-      self.document.attach(io: open(image_path), filename: "sticker-#{self.telegram_reference}#{File.extname(image_path)}")
+    Timeout::timeout(300) do
+      upscaled_url = Waifu.get_upscaled(telegram_url)
+      Pwinty.format_image(upscaled_url, scaling: 2) do |image_path|
+        self.document.attach(io: open(image_path), filename: "sticker-#{self.telegram_reference}#{File.extname(image_path)}")
+      end
     end
   end
 
