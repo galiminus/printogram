@@ -43,7 +43,6 @@ class CreatePwintyOrderWorker
     order.images.each do |image|
       if image.pwinty_reference.blank?
         image.generate_pwinty_image!
-        image.generate_upscaled_image!
 
         response = Pwinty.create_image(order, {
           sku: image.product.sku,
