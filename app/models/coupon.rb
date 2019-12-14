@@ -13,7 +13,7 @@ class Coupon < ApplicationRecord
   before_create :set_code
 
   def set_code
-    self.code = (0...CODE_LENGTH).map { CODE_CHARACTER_SET[SecureRandom.random_number(CODE_CHARACTER_SET.size)] }.join
+    self.code ||= (0...CODE_LENGTH).map { CODE_CHARACTER_SET[SecureRandom.random_number(CODE_CHARACTER_SET.size)] }.join
   end
 
   def name

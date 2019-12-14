@@ -5,7 +5,7 @@ Please <b>send me your first sticker</b> or share a sticker set.
 <% end %>
 
 <% if customer.draft_order.images.any? %>
-<b>Cart - <%= Money.new(customer.draft_order.price, "USD").format(symbol: '$') %></b><%= customer.draft_order.coupon.present? ? " (#{customer.draft_order.coupon.as_words})" : "" %>
+<b>Cart - <%= Money.new(customer.draft_order.price, "USD").format(symbol: '$') %></b><%= customer.draft_order.coupon.present? ? " (#{customer.draft_order.coupon.as_words}) included" : "" %>
 /edit - delete some stickers
 /clear - clear your shopping cart
 /shipping - see shipping options
