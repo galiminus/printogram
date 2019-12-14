@@ -31,9 +31,9 @@ class Coupon < ApplicationRecord
     if use_limit_by_customer.blank?
       reduction
     elsif use_limit_by_customer == 1
-      "#{reduction} on your first purchase"
+      "#{reduction} your first purchase"
     else
-      "#{reduction} on your first #{use_limit_by_customer} purchases"
+      "#{reduction} your first #{use_limit_by_customer} purchases"
     end
   end
 
