@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_12_11_094113) do
+ActiveRecord::Schema.define(version: 2019_12_14_091036) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -68,6 +68,10 @@ ActiveRecord::Schema.define(version: 2019_12_11_094113) do
     t.bigint "product_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.datetime "end_at"
+    t.float "ratio"
+    t.integer "use_limit", default: 1
+    t.integer "use_limit_by_customer", default: 1
     t.index ["product_id"], name: "index_coupons_on_product_id"
   end
 
@@ -122,7 +126,7 @@ ActiveRecord::Schema.define(version: 2019_12_11_094113) do
     t.string "state_or_county_ciphertext"
     t.string "postal_or_zip_code_ciphertext"
     t.string "customer_name_ciphertext"
-    t.index ["coupon_id"], name: "index_orders_on_coupon_id", unique: true
+    t.index ["coupon_id"], name: "index_orders_on_coupon_id"
     t.index ["customer_id"], name: "index_orders_on_customer_id"
     t.index ["state"], name: "index_orders_on_state"
   end
@@ -136,6 +140,7 @@ ActiveRecord::Schema.define(version: 2019_12_11_094113) do
     t.datetime "updated_at", precision: 6, null: false
     t.integer "price"
     t.float "scale"
+    t.string "short_name"
   end
 
   create_table "versions", force: :cascade do |t|
