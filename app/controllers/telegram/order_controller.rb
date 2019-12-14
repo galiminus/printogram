@@ -100,8 +100,8 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
       respond_with :message, text: render("shipping_options", shipping_options: @customer.draft_order.shipping_options, country: country), parse_mode: "HTML"
 
     elsif message["text"].present? && coupon = Coupon.find_by(code: message["text"].strip.upcase)
-      if coupon.orders.any?
-        respond_with :message, text: render("coupon_already_used"), parse_mode: "HTML"
+      if coupon.expired? || !coupon.is_in_use_limit? || !coupon.is_in_use_limit_by_customer?(@customer)
+        respond_with :message, text: render("coupon_expired"), parse_mode: "HTML"
       else
         @customer.draft_order.update(coupon: coupon)
 

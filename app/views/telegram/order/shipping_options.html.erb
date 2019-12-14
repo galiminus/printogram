@@ -1,5 +1,5 @@
 <% if shipping_options.any? %>
-Current shipping options for <b><%= country.name %></b>.
+Current shipping options to <b><%= country.name %></b>.
 
 <% shipping_options.each do |details| %>
 <b><%= details["shipping_method"] %> - <%= Money.new(details["usd_price"], "USD").format(symbol: '$') %></b>
@@ -8,7 +8,7 @@ Estimated date of arrival <i><%= details["estimated_arrival_date"].strftime("%B 
 
 <% end %>
 <% else %>
-No shipping options currently available for <b><%= country.name %></b>.
+No shipping options currently available to <b><%= country.name %></b>.
 <% end %>
 
 <%= render partial: "telegram/order/order_menu", locals: { customer: customer } %>

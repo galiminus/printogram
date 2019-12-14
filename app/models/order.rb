@@ -30,9 +30,18 @@ class Order < ApplicationRecord
 
   def price
     prices = images.group_by(&:product).map do |product, images|
-      [ product, [0, images.count - (coupon.present? && coupon.product == product ? coupon.count : 0)].max ]
-    end.sum do |product, count|
-      product.price * count
+      [
+        product,
+        [0, images.count - (coupon.present? && coupon.count.present? && coupon.product == product ? coupon.count : 0)].max
+      ]
+    end.map do |product, count|
+      [ product, product.price * count ]
+    end.sum do |product, price|
+      if coupon.present? && coupon.ratio.present? && coupon.product == product
+        (price * coupon.ratio).round
+      else
+        price
+      end
     end
   end
 
