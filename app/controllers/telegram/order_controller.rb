@@ -259,6 +259,10 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
     respond_with :message, text: render("faq"), parse_mode: "HTML"
   end
 
+  def cart!(data = nil, *)
+    respond_with :message, text: render("cart"), parse_mode: "HTML"
+  end
+
   def order!(data = nil, *)
     order = @customer.orders.find_each.find { |o| o.reference == data }
     if order.blank?

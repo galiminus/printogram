@@ -1,0 +1,4 @@
+start - Main menu
+cart - See your cart
+faq - Frequently Asked Questions
+terms - Terms and Conditions
