@@ -22,6 +22,9 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
 
   DONE_EDIT = "« Back"
 
+  TERMS_REFUSE = "« Cancel"
+  TERMS_AGREE = "I agree"
+
   rescue_from Exception do |error|
     if Rails.env.development?
       raise error
@@ -152,6 +155,12 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
       @customer.draft_order.destroy
       respond_with :message, text: render("order_cleared"), parse_mode: "HTML"
 
+    elsif data == "TERMS_REFUSE"
+      respond_with :message, text: render("welcome"), parse_mode: "HTML"
+
+    elsif data == "TERMS_AGREE"
+      respond_with :message, text: render("new_order_started"), parse_mode: "HTML"
+
     elsif data == "CHECKOUT"
       respond_with(:invoice, {
         title: "Checkout",
@@ -221,7 +230,14 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
         ]
       }
     else
-      respond_with :message, text: render("new_order_started"), parse_mode: "HTML"
+      respond_with :message, text: render("new_order_terms"), parse_mode: "HTML", reply_markup: {
+        inline_keyboard: [
+          [
+            { text: TERMS_REFUSE, callback_data: "TERMS_REFUSE" },
+            { text: TERMS_AGREE, callback_data: "TERMS_AGREE" },
+          ]
+        ]
+      }
     end
   end
 
