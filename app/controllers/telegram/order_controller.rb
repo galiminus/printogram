@@ -178,18 +178,22 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
       respond_with :message, text: render("new_order_started"), parse_mode: "HTML"
 
     elsif data == "CHECKOUT"
-      respond_with(:invoice, {
-        title: "Checkout",
-        description: "Please enter your payment and shipping information. The process is fully handled by Telegram and your private payment information will never be shared with us.",
-        provider_token: Rails.application.credentials.stripe[:telegram_token],
-        currency: "USD",
-        start_parameter: "checkout",
-        prices: [{ label: "#{@customer.draft_order.images.count} stickers", amount: @customer.draft_order.price }],
-        need_name: true,
-        need_shipping_address: true,
-        payload: JSON.dump({ order_id: @customer.draft_order.id }),
-        is_flexible: true,
-      })
+      if ENV["ENABLE_ORDERS"] == 'true'
+        respond_with(:invoice, {
+          title: "Checkout",
+          description: "Please enter your payment and shipping information. The process is fully handled by Telegram and your private payment information will never be shared with us.",
+          provider_token: Rails.application.credentials.stripe[:telegram_token],
+          currency: "USD",
+          start_parameter: "checkout",
+          prices: [{ label: "#{@customer.draft_order.images.count} stickers", amount: @customer.draft_order.price }],
+          need_name: true,
+          need_shipping_address: true,
+          payload: JSON.dump({ order_id: @customer.draft_order.id }),
+          is_flexible: true,
+        })
+      else
+        respond_with :message, text: render("orders_disabled"), parse_mode: "HTML"
+      end
 
     elsif data.match(/^SET_CART_PAGE_/)
       page = data.match(/^SET_CART_PAGE_([0-9]+)$/)[1]
