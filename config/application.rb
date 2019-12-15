@@ -18,5 +18,6 @@ module Printogram
 
     config.site_name = ENV["SITE_NAME"] ||  Rails.application.class.module_parent_name
     config.max_image_count_per_order = (ENV["MAX_IMAGE_COUNT_PER_ORDER"] || 100).to_i
+    config.sticker_limit = (ENV["STICKER_LIMIT"] || 3).to_i
   end
 end

@@ -57,10 +57,6 @@ class Order < ApplicationRecord
     ]
   end
 
-  def is_printing_limit_by_sticker_reached_reached?
-    self.images.where(telegram_reference: telegram_reference).count >= (ENV["PRINTING_LIMIT_BY_STICKER"] || 3).to_i
-  end
-
   def as_json(options = {})
     {
       created_at: self.created_at,

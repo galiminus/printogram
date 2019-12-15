@@ -1,3 +1,5 @@
+class StickerLimitReached < StandardError; end
+
 class Telegram::OrderController < Telegram::Bot::UpdatesController
   include Telegram::Bot::UpdatesController::Session
 
@@ -51,7 +53,12 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
 
       respond_with :message, text: render("sticker_loading"), parse_mode: "HTML"
 
-      add_sticker(message["sticker"])
+      begin
+        add_sticker(message["sticker"])
+      rescue StickerLimitReached
+        respond_with :message, text: render("sticker_limit_reached"), parse_mode: "HTML"
+        return
+      end
 
       if @customer.draft_order.images.count > 1
         Montage.create_cart(@customer.draft_order) do |path|
@@ -86,12 +93,21 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
         return respond_with :message, text: render("max_image_count_per_order_reached"), parse_mode: "HTML"
       end
 
+      respond_with :message, text: render("sticker_set_loading"), parse_mode: "HTML"
+
       message = nil
       message_time = nil
+      sticker_limit_warned = false
       allowed_stickers.each.with_index do |sticker_message, index|
-        add_sticker(sticker_message)
+        begin
+          add_sticker(sticker_message)
+        rescue StickerLimitReached
+          if sticker_limit_warned == false
+            respond_with :message, text: render("sticker_limit_reached_in_stickerset"), parse_mode: "HTML"
+          end
+          sticker_limit_warned = true
+        end
       end
-      respond_with :message, text: render("sticker_set_loading"), parse_mode: "HTML"
 
       Montage.create_cart(@customer.draft_order) do |path|
         respond_with :photo, photo: open(path), caption: render("sticker_added"), parse_mode: "HTML"
@@ -416,10 +432,14 @@ class Telegram::OrderController < Telegram::Bot::UpdatesController
   end
 
   def add_sticker(sticker_message)
-    Image.create!(
-      order: @customer.draft_order,
-      product: @product,
-      telegram_reference: sticker_message["file_id"],
-    )
+    if @customer.draft_order.images.where(telegram_reference: sticker_message["file_id"]).count >= Rails.configuration.sticker_limit
+      raise StickerLimitReached
+    else
+      Image.create!(
+        order: @customer.draft_order,
+        product: @product,
+        telegram_reference: sticker_message["file_id"],
+      )
+    end
   end
 end
