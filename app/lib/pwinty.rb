@@ -79,7 +79,8 @@ module Pwinty
   def self.convert(command)
     convert_path = Rails.root.join("vendor/imagemagick/bin/convert")
 
-    system("#{convert_path.exist? ? "MAGICK_CONFIGURE_PATH=#{Rails.root}/vendor/imagemagick/etc/ImageMagick-7/ #{convert_path}" : "convert"} #{command}")
+    full_command = ("#{convert_path.exist? ? "MAGICK_CONFIGURE_PATH=#{Rails.root}/vendor/imagemagick/etc/ImageMagick-7/ #{convert_path}" : "convert"} #{command}")
+    system(full_command)
     raise if $? != 0
   end
 end
